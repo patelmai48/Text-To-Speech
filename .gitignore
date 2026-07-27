@@ -1,0 +1,27 @@
+# Environments
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# SQLite databases
+*.sqlite3
+*.db
+instance/
+database.db
+
+# Audio generated files
+static/audio/*.mp3
+static/audio/*.wav
+
+# IDEs
+.vscode/
+.idea/
