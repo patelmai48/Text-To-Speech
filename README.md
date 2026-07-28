@@ -10,9 +10,11 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 - **User Registration & Login**: Account creation with input validation.
 - **JWT Protection**: Secure stateful JWT access tokens and authorization headers (`Bearer <token>`).
 - **Password Hashing**: Industry-standard salted hashing powered by `Werkzeug.security`.
+- **Google Sign-In Selector Modal**: A custom simulated Google authentication interface offering quick account selections (such as `pmahi4834@gmail.com`) or custom email entries for instant signup/login.
 
 ### 🎛️ AI Text-to-Speech Core Engine
 - **Multi-Language & Accent Voice Selection**: Synthesize speech in US English, UK English, Spanish, French, German, Hindi, Japanese, Chinese, Italian, Russian, and more.
+- **High-Quality Male Neural Voices**: Integrated `edge-tts` to support 11 natural-sounding, realistic male neural voices across different languages (US/UK English, Spanish, French, German, Portuguese, Russian, Arabic, Korean, Chinese, Italian, Hindi).
 - **Audio Controls**: Fine-tune Playback Speed (0.5x – 2.0x), Voice Pitch, and Volume.
 - **Speech Audio Waveform**: Real-time HTML5 Canvas visualizer animated using Web Audio API frequency analysis.
 - **Draft Auto-save**: Automatically saves draft text locally so work is never lost.
@@ -28,6 +30,10 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 ### 🎨 Design & Accessibility
 - **Modern Glassmorphism UI**: Backdrop blurs, ambient animated glowing background orbs, smooth transitions, and vibrant gradient accents.
 - **Dark & Light Mode Switcher**: Seamless theme toggle with local storage memory.
+- **Optimized Light Mode Aesthetics**:
+  - Warm cream/beige background (`#FAF6EB`) input areas and dropdown selects with high-contrast text to improve readability.
+  - Vibrant welcome back banner utilizing a gradient (Indigo-to-Blue) with solid black text overlay.
+  - Large, gold-styled **Favorite** star button and icon for highlighted visual hierarchy.
 - **Toast Notifications**: Non-intrusive interactive alert toasts for all feedback and errors.
 - **Keyboard Shortcuts**:
   - `Ctrl + Enter`: Convert text to speech.
@@ -42,7 +48,7 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 | Layer | Technologies |
 | :--- | :--- |
 | **Frontend** | HTML5, CSS3 (Vanilla Glassmorphism, CSS Custom Properties), JavaScript (Vanilla ES6+), Web Audio API, Canvas API |
-| **Backend** | Python 3.14+, Flask 3.0+, Flask-SQLAlchemy, Flask-CORS, PyJWT, gTTS |
+| **Backend** | Python 3.14+, Flask 3.0+, Flask-SQLAlchemy, Flask-CORS, PyJWT, gTTS, edge-tts |
 | **Database** | SQLite3 |
 | **Reporting** | ReportLab (PDF Generation), Python `csv` module |
 | **Security** | Werkzeug Security, JWT Tokens, Environment Variables (`python-dotenv`) |
