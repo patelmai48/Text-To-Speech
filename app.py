@@ -27,6 +27,18 @@ def create_app(config_name=None):
     app.register_blueprint(tts_bp, url_prefix='/api')
     app.register_blueprint(profile_bp, url_prefix='/api')
 
+    # Configure logging
+    import logging
+    from logging.handlers import RotatingFileHandler
+    logging.basicConfig(level=logging.INFO)
+    formatter = logging.Formatter('[%(asctime)s] %(levelname)s in %(module)s: %(message)s')
+    
+    file_handler = RotatingFileHandler('app.log', maxBytes=1024000, backupCount=10)
+    file_handler.setFormatter(formatter)
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+    app.logger.info('VoxAI Studio starting up...')
+
     # Frontend Page Routes
     @app.route('/')
     def index():
@@ -40,6 +52,14 @@ def create_app(config_name=None):
     def register_page():
         return render_template('register.html')
 
+    @app.route('/privacy')
+    def privacy_page():
+        return render_template('privacy.html')
+
+    @app.route('/terms')
+    def terms_page():
+        return render_template('terms.html')
+
     # Serve generated audio files directly if requested via /static/audio/<filename>
     @app.route('/static/audio/<filename>')
     def serve_audio(filename):
@@ -48,15 +68,35 @@ def create_app(config_name=None):
     # Global Error Handlers
     @app.errorhandler(404)
     def not_found_error(error):
+        app.logger.warning(f"404 error: {error}")
         return jsonify({'success': False, 'message': 'Resource not found'}), 404
 
     @app.errorhandler(500)
     def internal_error(error):
+        app.logger.error(f"500 error: {error}")
         db.session.rollback()
         return jsonify({'success': False, 'message': 'An internal server error occurred'}), 500
 
     # Initialize Database Tables
     with app.app_context():
+        # Auto-upgrade SQLite schema if columns are missing
+        try:
+            from sqlalchemy import inspect
+            inspector = inspect(db.engine)
+            if 'users' in inspector.get_table_names():
+                columns = [c['name'] for c in inspector.get_columns('users')]
+                with db.engine.begin() as conn:
+                    if 'email_verified' not in columns:
+                        conn.execute(db.text("ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT 0 NOT NULL"))
+                    if 'verification_code' not in columns:
+                        conn.execute(db.text("ALTER TABLE users ADD COLUMN verification_code VARCHAR(32)"))
+                    if 'reset_code' not in columns:
+                        conn.execute(db.text("ALTER TABLE users ADD COLUMN reset_code VARCHAR(32)"))
+                    if 'reset_code_expiry' not in columns:
+                        conn.execute(db.text("ALTER TABLE users ADD COLUMN reset_code_expiry DATETIME"))
+        except Exception as e:
+            app.logger.warning(f"Database schema auto-upgrade failed: {e}")
+
         db.create_all()
 
     return app
