@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,201 +8,47 @@
   <!-- Google Fonts & Bootstrap Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
+  
   <!-- Application Stylesheet -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3">
-
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
 <body>
   <div class="bg-orb bg-orb-1"></div>
   <div class="bg-orb bg-orb-2"></div>
-
-  <!-- Google Auth Configuration -->
-  <div id="g_id_onload" data-client_id="{% if config.GOOGLE_CLIENT_ID and not config.GOOGLE_CLIENT_ID.startswith('your-google-client-id') %}{{ config.GOOGLE_CLIENT_ID }}{% endif %}" data-context="signin" data-ux_mode="popup"
-    data-callback="handleGoogleSignIn" data-auto_prompt="false">
-  </div>
 
   <div class="auth-page-container">
     <div class="auth-card">
       <div class="auth-logo">
         <i class="bi bi-soundwave"></i>
       </div>
+      <h1 class="auth-title">Welcome Back</h1>
+      <p class="auth-subtitle">Log in to your VoxAI Studio account</p>
 
-      <!-- 1. LOGIN FORM -->
-      <div id="login-view">
-        <h1 class="auth-title">VoxAI Studio</h1>
-        <p class="auth-subtitle">Log in to your VoxAI Studio account</p>
-
-        <form class="auth-form" id="login-form">
-          <div>
-            <label class="control-label" for="email_or_username">Email or Username</label>
-            <input type="text" id="email_or_username" class="input-custom" placeholder="user@example.com" required>
-          </div>
-
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <label class="control-label" for="password" style="margin-bottom: 0;">Password</label>
-              <a href="#" id="show-forgot-btn"
-                style="font-size: 0.8rem; color: var(--accent-primary); text-decoration: none;">Forgot password?</a>
-            </div>
-            <input type="password" id="password" class="input-custom" placeholder="••••••••" required>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
-            Sign In <i class="bi bi-arrow-right"></i>
-          </button>
-        </form>
-
-        <div style="margin: 20px 0 10px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-          <span style="height: 1px; background: var(--glass-border); flex: 1;"></span>
-          <span
-            style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Or
-            continue with</span>
-          <span style="height: 1px; background: var(--glass-border); flex: 1;"></span>
+      <form class="auth-form" id="login-form">
+        <div>
+          <label class="control-label" for="email_or_username">Email or Username</label>
+          <input type="text" id="email_or_username" class="input-custom" placeholder="user@example.com" required>
         </div>
 
-        {% if config.GOOGLE_CLIENT_ID and not config.GOOGLE_CLIENT_ID.startswith('your-google-client-id') %}
-        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_dark"
-          data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="100%"></div>
-        {% else %}
-        <button type="button" class="btn-google" id="google-signin-btn">
-          <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" style="display: block;">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </button>
-        {% endif %}
-
-        <p style="margin-top: 24px; font-size: 0.9rem; color: var(--text-secondary);">
-          Don't have an account? <a href="/register">Create Account</a>
-        </p>
-      </div>
-
-      <!-- 2. FORGOT PASSWORD REQUEST FORM -->
-      <form class="auth-form" id="forgot-form" style="display: none;">
-        <h1 class="auth-title" style="font-size: 1.8rem;">Reset Password</h1>
-        <p class="auth-subtitle">Enter your email to receive a password reset code</p>
-
         <div>
-          <label class="control-label" for="forgot-email">Email Address</label>
-          <input type="email" id="forgot-email" class="input-custom" placeholder="john@example.com" required>
+          <label class="control-label" for="password">Password</label>
+          <input type="password" id="password" class="input-custom" placeholder="••••••••" required>
         </div>
 
         <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
-          Send Reset Code <i class="bi bi-send"></i>
+          Sign In <i class="bi bi-arrow-right"></i>
         </button>
-
-        <p style="margin-top: 20px; font-size: 0.9rem;">
-          <a href="#" id="back-to-login-btn" style="color: var(--text-secondary); text-decoration: none;"><i
-              class="bi bi-arrow-left"></i> Back to Login</a>
-        </p>
       </form>
 
-      <!-- 3. RESET PASSWORD CONFIRM FORM -->
-      <form class="auth-form" id="reset-form" style="display: none;">
-        <h1 class="auth-title" style="font-size: 1.8rem;">Change Password</h1>
-        <p class="auth-subtitle">Enter the 6-digit reset code and your new password</p>
-
-        <input type="hidden" id="reset-email">
-
-        <div>
-          <label class="control-label" for="reset-code">Reset Code</label>
-          <input type="text" id="reset-code" class="input-custom" placeholder="6-digit code" required>
-        </div>
-
-        <div>
-          <label class="control-label" for="reset-new-password">New Password</label>
-          <input type="password" id="reset-new-password" class="input-custom" placeholder="Min 6 characters" required>
-        </div>
-
-        <div>
-          <label class="control-label" for="reset-confirm-password">Confirm Password</label>
-          <input type="password" id="reset-confirm-password" class="input-custom" placeholder="••••••••" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
-          Update Password <i class="bi bi-check-circle"></i>
-        </button>
-
-        <p style="margin-top: 20px; font-size: 0.9rem;">
-          <a href="#" id="back-to-login-btn-2" style="color: var(--text-secondary); text-decoration: none;"><i
-              class="bi bi-arrow-left"></i> Back to Login</a>
-        </p>
-      </form>
-
-    </div>
-
-    <footer class="auth-footer">
-      <a href="/privacy">Privacy Policy</a> |
-      <a href="/terms">Terms & Conditions</a>
-    </footer>
-  </div>
-
-  <!-- Simulated Google Account Selector Modal -->
-  <div class="modal-overlay" id="google-sim-modal" style="display: none;">
-    <div class="glass-card modal-card" style="max-width: 400px; text-align: left;">
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
-        <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
-        </svg>
-        <span style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">Sign in with Google</span>
-      </div>
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">Choose an account to continue to <strong>VoxAI Studio</strong></p>
-      
-      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
-        <button type="button" class="sim-account-btn" data-email="pmahi4834@gmail.com" data-username="Mahi Patel">
-          <div class="sim-avatar">M</div>
-          <div style="text-align: left;">
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">Mahi Patel</div>
-            <div style="color: var(--text-muted); font-size: 0.8rem;">pmahi4834@gmail.com</div>
-          </div>
-        </button>
-
-        <button type="button" class="sim-account-btn" data-email="google-dev@example.com" data-username="Google Dev">
-          <div class="sim-avatar" style="background: var(--accent-secondary);">G</div>
-          <div style="text-align: left;">
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">Google Dev</div>
-            <div style="color: var(--text-muted); font-size: 0.8rem;">google-dev@example.com</div>
-          </div>
-        </button>
-
-        <button type="button" class="sim-account-btn" id="sim-custom-account-btn">
-          <div class="sim-avatar" style="background: var(--bg-tertiary); color: var(--text-secondary);"><i class="bi bi-person-plus-fill"></i></div>
-          <div style="text-align: left;">
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">Use another account</div>
-            <div style="color: var(--text-muted); font-size: 0.8rem;">Type a custom email</div>
-          </div>
-        </button>
-      </div>
-
-      <div id="sim-custom-input-panel" style="display: none; margin-bottom: 20px;">
-        <label class="control-label" for="sim-custom-email">Email Address</label>
-        <div style="display: flex; gap: 8px;">
-          <input type="email" id="sim-custom-email" class="input-custom" placeholder="name@example.com" style="padding: 8px 12px; font-size: 0.9rem;">
-          <button type="button" class="btn btn-primary" id="sim-custom-submit-btn" style="padding: 8px 16px; font-size: 0.9rem;">Next</button>
-        </div>
-      </div>
-
-      <div style="display: flex; justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary btn-sm" id="close-google-sim-btn">Cancel</button>
-      </div>
+      <p style="margin-top: 24px; font-size: 0.9rem; color: var(--text-secondary);">
+        Don't have an account? <a href="/register">Create Account</a>
+      </p>
     </div>
   </div>
 
   <script src="{{ url_for('static', filename='js/api.js') }}"></script>
   <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 </body>
-
 </html>

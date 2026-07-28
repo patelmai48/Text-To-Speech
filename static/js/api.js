@@ -85,12 +85,7 @@ const API = {
         return await response.blob();
       }
 
-      let json;
-      try {
-        json = await response.json();
-      } catch (e) {
-        json = { success: false, message: `Server error (Status ${response.status})` };
-      }
+      const json = await response.json();
 
       if (!response.ok && !json.message) {
         json.message = `HTTP error status: ${response.status}`;
@@ -100,7 +95,7 @@ const API = {
     } catch (error) {
       console.error('API Client Error:', error);
       showToast('Network error or server unavailable.', 'error');
-      return { success: false, message: error.message || 'Network error or server unavailable' };
+      return { success: false, message: error.message || 'Network error' };
     }
   },
 

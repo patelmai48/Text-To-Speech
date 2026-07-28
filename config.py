@@ -21,17 +21,6 @@ class Config:
     AUDIO_FOLDER = os.path.join(BASE_DIR, 'static', 'audio')
     MAX_TEXT_LENGTH = 3000
 
-    # SMTP configuration
-    MAIL_SERVER = os.getenv('MAIL_SERVER')
-    MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
-    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', 'True').lower() in ('true', '1', 't')
-    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
-    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
-
-    # Google Sign-in Client ID
-    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
-
 class DevelopmentConfig(Config):
     DEBUG = True
 

@@ -49,21 +49,9 @@ def create_tts(current_user):
     text = data.get('text', '').strip()
     voice = data.get('voice', 'en-us').strip()
     language = data.get('language', 'en').strip()
-    try:
-        speed = float(data.get('speed', 1.0))
-        pitch = float(data.get('pitch', 1.0))
-        volume = float(data.get('volume', 1.0))
-    except (ValueError, TypeError):
-        return jsonify({'success': False, 'message': 'Invalid parameter format for speed, pitch, or volume.'}), 400
-
-    if not (0.5 <= speed <= 2.0):
-        return jsonify({'success': False, 'message': 'Speed must be between 0.5 and 2.0.'}), 400
-
-    if not (0.5 <= pitch <= 2.0):
-        return jsonify({'success': False, 'message': 'Pitch must be between 0.5 and 2.0.'}), 400
-
-    if not (0.0 <= volume <= 1.0):
-        return jsonify({'success': False, 'message': 'Volume must be between 0.0 and 1.0.'}), 400
+    speed = float(data.get('speed', 1.0))
+    pitch = float(data.get('pitch', 1.0))
+    volume = float(data.get('volume', 1.0))
 
     if not text:
         return jsonify({'success': False, 'message': 'Text input cannot be empty.'}), 400
