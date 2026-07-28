@@ -52,13 +52,13 @@ EDGE_VOICE_MAPPING = {
     "es-mx-male": "es-MX-JorgeNeural",
     "fr-fr-male": "fr-FR-HenriNeural",
     "fr-ca-male": "fr-CA-AntoineNeural",
-    "de-de-male": "de-DE-ChristophNeural",
+    "de-de-male": "de-DE-ConradNeural",
     "pt-br-male": "pt-BR-AntonioNeural",
     "ru-ru-male": "ru-RU-DmitryNeural",
     "ar-sa-male": "ar-SA-HamedNeural",
     "ko-kr-male": "ko-KR-InJoonNeural",
     "zh-cn-male": "zh-CN-YunxiNeural",
-    "it-it-male": "it-IT-GianniNeural"
+    "it-it-male": "it-IT-DiegoNeural"
 }
 
 def get_voice_meta(voice_id):
@@ -125,6 +125,7 @@ def generate_speech(text, voice_id="en-us", speed=1.0, output_folder="static/aud
         elif tld == "edge":
             import asyncio
             import edge_tts
+            import threading
             
             edge_voice_name = EDGE_VOICE_MAPPING.get(voice_id.lower(), "en-US-AndrewNeural")
             
@@ -136,7 +137,30 @@ def generate_speech(text, voice_id="en-us", speed=1.0, output_folder="static/aud
                 communicate = edge_tts.Communicate(cleaned_text, voice=edge_voice_name, rate=rate_str)
                 await communicate.save(filepath)
 
-            asyncio.run(run_edge_tts())
+            def run_async_safely(coro):
+                result = []
+                error = []
+
+                def target():
+                    try:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        res = loop.run_until_complete(coro)
+                        result.append(res)
+                    except Exception as ex:
+                        error.append(ex)
+                    finally:
+                        loop.close()
+
+                thread = threading.Thread(target=target)
+                thread.start()
+                thread.join()
+
+                if error:
+                    raise error[0]
+                return result[0] if result else None
+
+            run_async_safely(run_edge_tts())
         else:
             tts = gTTS(text=cleaned_text, lang=lang, tld=tld, slow=is_slow)
             tts.save(filepath)

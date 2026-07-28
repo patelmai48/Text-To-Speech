@@ -10,7 +10,7 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 - **User Registration & Login**: Account creation with input validation.
 - **JWT Protection**: Secure stateful JWT access tokens and authorization headers (`Bearer <token>`).
 - **Password Hashing**: Industry-standard salted hashing powered by `Werkzeug.security`.
-- **Google Sign-In Selector Modal**: A custom simulated Google authentication interface offering quick account selections (such as `patelmai82@gmail.com`) or custom email entries for instant signup/login.
+- **Google Sign-In Selector Modal**: A custom simulated Google authentication interface offering quick account selections (such as `pmahi4834@gmail.com`) or custom email entries for instant signup/login.
 
 ### 🎛️ AI Text-to-Speech Core Engine
 - **Multi-Language & Accent Voice Selection**: Synthesize speech in US English, UK English, Spanish, French, German, Hindi, Japanese, Chinese, Italian, Russian, and more.

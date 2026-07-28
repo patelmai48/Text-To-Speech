@@ -230,8 +230,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (googleBtn && googleSimModal) {
     googleBtn.addEventListener('click', () => {
-      // Reset modal state
-      if (simCustomInputPanel) simCustomInputPanel.style.display = 'none';
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const simPresetAccounts = googleSimModal.querySelector('.sim-preset-accounts');
+      
+      if (isLocalhost) {
+        if (simPresetAccounts) simPresetAccounts.style.display = 'flex';
+        if (simCustomInputPanel) simCustomInputPanel.style.display = 'none';
+      } else {
+        if (simPresetAccounts) simPresetAccounts.style.display = 'none';
+        if (simCustomInputPanel) simCustomInputPanel.style.display = 'block';
+        if (simCustomEmail) {
+          setTimeout(() => simCustomEmail.focus(), 100);
+        }
+      }
+
       if (simCustomEmail) simCustomEmail.value = '';
       googleSimModal.style.display = 'flex';
       googleSimModal.classList.add('open');
