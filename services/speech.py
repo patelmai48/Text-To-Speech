@@ -23,42 +23,12 @@ SUPPORTED_LANGUAGES = [
     {"code": "ar", "tld": "com", "name": "Arabic (Standard)", "voice_id": "ar-sa", "flag": "🇸🇦", "gender": "Female"},
     {"code": "ko", "tld": "co.kr", "name": "Korean (South Korea)", "voice_id": "ko-kr", "flag": "🇰🇷", "gender": "Female"},
     
-    # High-quality Microsoft Edge Neural Voices (including Male voices)
-    {"code": "en", "tld": "edge", "name": "English (US) - Male", "voice_id": "en-us-male", "flag": "🇺🇸", "gender": "Male"},
-    {"code": "en", "tld": "edge", "name": "English (UK) - Male", "voice_id": "en-uk-male", "flag": "🇬🇧", "gender": "Male"},
-    {"code": "en", "tld": "edge", "name": "English (India) - Male", "voice_id": "en-in-male", "flag": "🇮🇳", "gender": "Male"},
-    {"code": "hi", "tld": "edge", "name": "Hindi (India) - Male", "voice_id": "hi-in-male", "flag": "🇮🇳", "gender": "Male"},
-    {"code": "en", "tld": "edge", "name": "English (US) - Female (Neural)", "voice_id": "en-us-female-neural", "flag": "🇺🇸", "gender": "Female"},
-    {"code": "es", "tld": "edge", "name": "Spanish (Spain) - Male", "voice_id": "es-es-male", "flag": "🇪🇸", "gender": "Male"},
-    {"code": "es", "tld": "edge", "name": "Spanish (Mexico) - Male", "voice_id": "es-mx-male", "flag": "🇲🇽", "gender": "Male"},
-    {"code": "fr", "tld": "edge", "name": "French (France) - Male", "voice_id": "fr-fr-male", "flag": "🇫🇷", "gender": "Male"},
-    {"code": "fr", "tld": "edge", "name": "French (Canada) - Male", "voice_id": "fr-ca-male", "flag": "🇨🇦", "gender": "Male"},
-    {"code": "de", "tld": "edge", "name": "German (Germany) - Male", "voice_id": "de-de-male", "flag": "🇩🇪", "gender": "Male"},
-    {"code": "pt", "tld": "edge", "name": "Portuguese (Brazil) - Male", "voice_id": "pt-br-male", "flag": "🇧🇷", "gender": "Male"},
-    {"code": "ru", "tld": "edge", "name": "Russian (Russia) - Male", "voice_id": "ru-ru-male", "flag": "🇷🇺", "gender": "Male"},
-    {"code": "ar", "tld": "edge", "name": "Arabic (Standard) - Male", "voice_id": "ar-sa-male", "flag": "🇸🇦", "gender": "Male"},
-    {"code": "ko", "tld": "edge", "name": "Korean (South Korea) - Male", "voice_id": "ko-kr-male", "flag": "🇰🇷", "gender": "Male"},
-    {"code": "zh-CN", "tld": "edge", "name": "Chinese (Mandarin) - Male", "voice_id": "zh-cn-male", "flag": "🇨🇳", "gender": "Male"},
-    {"code": "it", "tld": "edge", "name": "Italian (Italy) - Male", "voice_id": "it-it-male", "flag": "🇮🇹", "gender": "Male"}
+    # High-quality Microsoft Edge Neural Voices
+    {"code": "en", "tld": "edge", "name": "English (US) - Female (Neural)", "voice_id": "en-us-female-neural", "flag": "🇺🇸", "gender": "Female"}
 ]
 
 EDGE_VOICE_MAPPING = {
-    "en-us-male": "en-US-AndrewNeural",
-    "en-uk-male": "en-GB-RyanNeural",
-    "en-in-male": "en-IN-PrabhatNeural",
-    "en-us-female-neural": "en-US-EmmaNeural",
-    "hi-in-male": "hi-IN-MadhurNeural",
-    "es-es-male": "es-ES-AlvaroNeural",
-    "es-mx-male": "es-MX-JorgeNeural",
-    "fr-fr-male": "fr-FR-HenriNeural",
-    "fr-ca-male": "fr-CA-AntoineNeural",
-    "de-de-male": "de-DE-ConradNeural",
-    "pt-br-male": "pt-BR-AntonioNeural",
-    "ru-ru-male": "ru-RU-DmitryNeural",
-    "ar-sa-male": "ar-SA-HamedNeural",
-    "ko-kr-male": "ko-KR-InJoonNeural",
-    "zh-cn-male": "zh-CN-YunxiNeural",
-    "it-it-male": "it-IT-DiegoNeural"
+    "en-us-female-neural": "en-US-EmmaNeural"
 }
 
 def get_voice_meta(voice_id):

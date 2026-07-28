@@ -14,7 +14,7 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 
 ### 🎛️ AI Text-to-Speech Core Engine
 - **Multi-Language & Accent Voice Selection**: Synthesize speech in US English, UK English, Spanish, French, German, Hindi, Japanese, Chinese, Italian, Russian, and more.
-- **High-Quality Male Neural Voices**: Integrated `edge-tts` to support 11 natural-sounding, realistic male neural voices across different languages (US/UK English, Spanish, French, German, Portuguese, Russian, Arabic, Korean, Chinese, Italian, Hindi).
+- **High-Quality Neural Voices**: Integrated `edge-tts` to support high-quality natural-sounding neural voices.
 - **Audio Controls**: Fine-tune Playback Speed (0.5x – 2.0x), Voice Pitch, and Volume.
 - **Speech Audio Waveform**: Real-time HTML5 Canvas visualizer animated using Web Audio API frequency analysis.
 - **Draft Auto-save**: Automatically saves draft text locally so work is never lost.
