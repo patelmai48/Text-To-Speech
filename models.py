@@ -14,6 +14,11 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     last_login = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
+    email_verified = db.Column(db.Boolean, default=False, nullable=False)
+    verification_code = db.Column(db.String(32), nullable=True)
+    reset_code = db.Column(db.String(32), nullable=True)
+    reset_code_expiry = db.Column(db.DateTime, nullable=True)
+
     # Relationships
     histories = db.relationship('History', backref='user', lazy=True, cascade="all, delete-orphan")
     favorites = db.relationship('Favorite', backref='user', lazy=True, cascade="all, delete-orphan")
@@ -35,6 +40,7 @@ class User(db.Model):
             'id': self.id,
             'username': self.username,
             'email': self.email,
+            'email_verified': self.email_verified,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'last_login': self.last_login.isoformat() if self.last_login else None
         }

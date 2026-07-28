@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupShortcuts();
     setupEditorAutoSave();
     setupAudioPlayer();
+    setupVerificationHandlers();
 
     await loadUserData();
     await loadVoices();
@@ -177,6 +178,16 @@ document.addEventListener('DOMContentLoaded', () => {
       userNames.forEach(el => el.textContent = currentUser.username);
       userEmails.forEach(el => el.textContent = currentUser.email);
       userAvatars.forEach(el => el.textContent = currentUser.username.charAt(0).toUpperCase());
+
+      // Check verification status
+      const verifyBanner = document.getElementById('email-verify-banner');
+      if (verifyBanner) {
+        if (!currentUser.email_verified) {
+          verifyBanner.style.display = 'flex';
+        } else {
+          verifyBanner.style.display = 'none';
+        }
+      }
 
       // Update Dashboard Stats Cards
       if (res.stats) {
@@ -491,56 +502,140 @@ document.addEventListener('DOMContentLoaded', () => {
     const endpoint = searchQuery ? `/history?search=${encodeURIComponent(searchQuery)}` : '/history';
     const res = await API.get(endpoint);
 
-    if (res.success && historyTableBody) {
-      if (res.history.length === 0) {
-        historyTableBody.innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">
-              No conversion history found.
-            </td>
-          </tr>
-        `;
-        return;
+    if (res.success) {
+      // 1. Populate Desktop Table
+      if (historyTableBody) {
+        if (res.history.length === 0) {
+          historyTableBody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">
+                No conversion history found.
+              </td>
+            </tr>
+          `;
+        } else {
+          historyTableBody.innerHTML = res.history.map(item => `
+            <tr>
+              <td><span class="badge">#${item.id}</span></td>
+              <td class="history-text-cell" title="${item.text}">${item.text}</td>
+              <td><span class="badge">${item.voice}</span></td>
+              <td>${item.character_count} chars</td>
+              <td>${new Date(item.created_at).toLocaleDateString()}</td>
+              <td>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn btn-primary btn-sm play-history-btn" data-url="${item.audio_url}">
+                    <i class="bi bi-play-fill"></i> Play
+                  </button>
+                  <button class="btn btn-secondary btn-sm download-history-btn" data-url="${item.audio_url}" data-filename="speech_${item.id}.mp3" title="Download">
+                    <i class="bi bi-download"></i>
+                  </button>
+                  <button class="btn btn-danger btn-sm delete-history-btn" data-id="${item.id}">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `).join('');
+        }
       }
 
-      historyTableBody.innerHTML = res.history.map(item => `
-        <tr>
-          <td><span class="badge">#${item.id}</span></td>
-          <td class="history-text-cell" title="${item.text}">${item.text}</td>
-          <td><span class="badge">${item.voice}</span></td>
-          <td>${item.character_count} chars</td>
-          <td>${new Date(item.created_at).toLocaleDateString()}</td>
-          <td>
-            <div style="display:flex; gap:6px;">
-              <button class="btn btn-primary btn-sm play-history-btn" data-url="${item.audio_url}">
-                <i class="bi bi-play-fill"></i> Play
-              </button>
-              <button class="btn btn-danger btn-sm delete-history-btn" data-id="${item.id}">
-                <i class="bi bi-trash-fill"></i>
-              </button>
+      // 2. Populate Mobile Cards
+      const historyCardsContainer = document.getElementById('history-cards-container');
+      if (historyCardsContainer) {
+        if (res.history.length === 0) {
+          historyCardsContainer.innerHTML = `
+            <div class="glass-card" style="text-align:center; padding:30px; color:var(--text-muted); margin-bottom:0;">
+              No conversion history found.
             </div>
-          </td>
-        </tr>
-      `).join('');
+          `;
+        } else {
+          historyCardsContainer.innerHTML = res.history.map(item => {
+            const voiceMeta = availableVoices.find(v => v.voice_id === item.voice) || {
+              voice_id: item.voice,
+              name: item.voice.toUpperCase(),
+              flag: '🌐',
+              gender: 'Female',
+              code: 'en'
+            };
+            const estDuration = Math.max(1, Math.ceil(item.character_count / 15));
+            const formattedDate = new Date(item.created_at).toLocaleDateString();
+            
+            return `
+              <div class="history-card">
+                <div class="history-card-header">
+                  <div class="voice-info">
+                    <span class="voice-flag">${voiceMeta.flag}</span>
+                    <div class="voice-meta-details">
+                      <span class="voice-name">${voiceMeta.name}</span>
+                      <span class="voice-id-badge">${item.voice}</span>
+                    </div>
+                  </div>
+                  <span class="status-badge success-badge">
+                    <i class="bi bi-check-circle-fill"></i> Success
+                  </span>
+                </div>
+                
+                <div class="history-card-body">
+                  <p class="history-card-text" title="${item.text}">${item.text}</p>
+                  <div class="history-card-metadata">
+                    <div class="meta-row">
+                      <span class="meta-label">Language</span>
+                      <span class="meta-value">${voiceMeta.name.split(' (')[0]}</span>
+                    </div>
+                    <div class="meta-row">
+                      <span class="meta-label">Date</span>
+                      <span class="meta-value">${formattedDate}</span>
+                    </div>
+                    <div class="meta-row">
+                      <span class="meta-label">Duration</span>
+                      <span class="meta-value">${estDuration}s</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="history-card-actions">
+                  <button class="btn btn-primary btn-sm play-history-btn" data-url="${item.audio_url}">
+                    <i class="bi bi-play-fill"></i> Play
+                  </button>
+                  <button class="btn btn-secondary btn-sm download-history-btn" data-url="${item.audio_url}" data-filename="speech_${item.id}.mp3">
+                    <i class="bi bi-download"></i> Download
+                  </button>
+                  <button class="btn btn-danger btn-sm delete-history-btn" data-id="${item.id}">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
 
-      // Also update dashboard recent table preview
+      // 3. Update Dashboard Recent Table Preview
       const dashboardHistoryBody = document.getElementById('dashboard-recent-body');
       if (dashboardHistoryBody) {
-        dashboardHistoryBody.innerHTML = res.history.slice(0, 5).map(item => `
-          <tr>
-            <td class="history-text-cell">${item.text}</td>
-            <td><span class="badge">${item.voice}</span></td>
-            <td>${item.character_count}</td>
-            <td>
-              <button class="btn btn-primary btn-sm play-history-btn" data-url="${item.audio_url}">
-                <i class="bi bi-play-fill"></i>
-              </button>
-            </td>
-          </tr>
-        `).join('');
+        if (res.history.length === 0) {
+          dashboardHistoryBody.innerHTML = `
+            <tr>
+              <td colspan="4" style="text-align:center; padding: 20px; color: var(--text-muted);">No recent conversions.</td>
+            </tr>
+          `;
+        } else {
+          dashboardHistoryBody.innerHTML = res.history.slice(0, 5).map(item => `
+            <tr>
+              <td class="history-text-cell" title="${item.text}">${item.text}</td>
+              <td><span class="badge">${item.voice}</span></td>
+              <td>${item.character_count}</td>
+              <td>
+                <button class="btn btn-primary btn-sm play-history-btn" data-url="${item.audio_url}">
+                  <i class="bi bi-play-fill"></i>
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        }
       }
 
-      // Add event listeners for table buttons
+      // 4. Attach Event Listeners to rendered elements
       document.querySelectorAll('.play-history-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const url = btn.getAttribute('data-url');
@@ -549,14 +644,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
+      document.querySelectorAll('.download-history-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const url = btn.getAttribute('data-url');
+          const filename = btn.getAttribute('data-filename') || `speech_${Date.now()}.mp3`;
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.click();
+          showToast('Downloading audio file...', 'success');
+        });
+      });
+
       document.querySelectorAll('.delete-history-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const id = btn.getAttribute('data-id');
-          const delRes = await API.delete(`/history/${id}`);
-          if (delRes.success) {
-            showToast('History item deleted.', 'success');
-            await loadHistory();
-            await loadUserData();
+          if (confirm('Are you sure you want to delete this conversion record?')) {
+            const delRes = await API.delete(`/history/${id}`);
+            if (delRes.success) {
+              showToast('History item deleted.', 'success');
+              await loadHistory();
+              await loadUserData();
+            }
           }
         });
       });
@@ -601,28 +710,88 @@ document.addEventListener('DOMContentLoaded', () => {
     if (res.success && favoritesContainer) {
       if (res.favorites.length === 0) {
         favoritesContainer.innerHTML = `
-          <div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);">
+          <div class="glass-card" style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted); margin-bottom: 0;">
+            <i class="bi bi-star" style="font-size: 2.5rem; color: var(--text-muted); display: block; margin-bottom: 12px;"></i>
             No favorite voices added yet. Add voices from the TTS Studio!
           </div>
         `;
         return;
       }
 
-      favoritesContainer.innerHTML = res.favorites.map(fav => `
-        <div class="glass-card" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <i class="bi bi-star-fill" style="color:var(--accent-amber); font-size:1.4rem;"></i>
-            <div>
-              <div style="font-weight:700;">${fav.item_value}</div>
-              <div style="font-size:0.8rem; color:var(--text-muted);">${fav.item_type.toUpperCase()}</div>
+      // Fetch history for statistics computation
+      const historyRes = await API.get('/history');
+      const history = historyRes.success ? historyRes.history : [];
+
+      favoritesContainer.innerHTML = res.favorites.map(fav => {
+        // Find matching voice metadata from availableVoices
+        const voiceMeta = availableVoices.find(v => v.voice_id === fav.item_value) || {
+          voice_id: fav.item_value,
+          name: fav.item_value.toUpperCase(),
+          flag: '🌐',
+          gender: 'Unknown',
+          code: 'en'
+        };
+
+        // Calculate statistics
+        const voiceHistory = history.filter(h => h.voice === fav.item_value);
+        const timesUsed = voiceHistory.length;
+        let lastUsedStr = 'Never';
+        if (timesUsed > 0) {
+          const lastDate = new Date(voiceHistory[0].created_at);
+          lastUsedStr = lastDate.toLocaleDateString() + ' ' + lastDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        return `
+          <div class="voice-card glass-card" style="margin-bottom:0;">
+            <div class="voice-card-header">
+              <div class="voice-card-title">
+                <span class="voice-flag">${voiceMeta.flag}</span>
+                <div class="voice-lang-info">
+                  <span class="voice-lang-name">${voiceMeta.name}</span>
+                  <span class="voice-provider-badge"><i class="bi bi-cloud-check-fill"></i> Google TTS</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="voice-card-details">
+              <div class="detail-row">
+                <span class="detail-label"><i class="bi bi-translate"></i> Language</span>
+                <span class="detail-value">${voiceMeta.name.split(' (')[0]}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label"><i class="bi bi-gender-ambiguous"></i> Gender</span>
+                <span class="detail-value voice-gender-text gender-${voiceMeta.gender.toLowerCase()}">${voiceMeta.gender}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label"><i class="bi bi-cpu"></i> Voice Type</span>
+                <span class="detail-value voice-type-badge">Standard</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label"><i class="bi bi-clock"></i> Last Used</span>
+                <span class="detail-value">${lastUsedStr}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label"><i class="bi bi-graph-up-arrow"></i> Times Used</span>
+                <span class="detail-value usage-badge">${timesUsed}</span>
+              </div>
+            </div>
+
+            <div class="voice-card-actions">
+              <button class="btn btn-secondary btn-sm preview-voice-btn" data-voice="${voiceMeta.voice_id}" data-lang="${voiceMeta.code}" data-name="${voiceMeta.name}">
+                <i class="bi bi-play-circle-fill"></i> Preview
+              </button>
+              <button class="btn btn-primary btn-sm use-voice-btn" data-voice="${voiceMeta.voice_id}">
+                <i class="bi bi-mic-fill"></i> Use Voice
+              </button>
+              <button class="btn btn-danger btn-sm remove-fav-btn" data-id="${fav.id}">
+                <i class="bi bi-trash-fill"></i> Remove
+              </button>
             </div>
           </div>
-          <button class="btn btn-danger btn-sm remove-fav-btn" data-id="${fav.id}">
-            <i class="bi bi-trash"></i>
-          </button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
+      // Add event listeners for buttons
       document.querySelectorAll('.remove-fav-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const id = btn.getAttribute('data-id');
@@ -631,6 +800,67 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Favorite removed.', 'info');
             await loadFavorites();
             await loadUserData();
+          }
+        });
+      });
+
+      document.querySelectorAll('.use-voice-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const voiceId = btn.getAttribute('data-voice');
+          if (voiceSelect) {
+            voiceSelect.value = voiceId;
+            voiceSelect.dispatchEvent(new Event('change'));
+          }
+          const studioNavItem = document.querySelector('.nav-item[data-view="studio"]');
+          if (studioNavItem) {
+            studioNavItem.click();
+            showToast(`Selected voice: ${voiceId}`, 'success');
+          }
+        });
+      });
+
+      document.querySelectorAll('.preview-voice-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const voiceId = btn.getAttribute('data-voice');
+          const langCode = btn.getAttribute('data-lang');
+          const voiceName = btn.getAttribute('data-name');
+
+          // Localized preview text
+          const previews = {
+            'en': `Hello! This is a preview of the ${voiceName} voice.`,
+            'es': `¡Hola! Esta es una vista previa de la voz en español.`,
+            'fr': `Bonjour! Ceci est un aperçu de la voix française.`,
+            'de': `Hallo! Dies ist eine Vorschau der deutschen Stimme.`,
+            'hi': `नमस्ते! यह हिंदी आवाज़ का पूर्वावलोकन है।`,
+            'ja': `こんにちは！これは日本語の音声プレビューです。`,
+            'zh': `你好！这是中文普通话声音的预览。`,
+            'it': `Ciao! Questa è un'anteprima della voce italiana.`,
+            'pt': `Olá! Esta é uma prévia da voz em português.`,
+            'ru': `Привет! Это пример звучания русского голоса.`,
+            'ar': `مرحباً! هذا معاينة للصوت العربي.`,
+            'ko': `안녕하세요! 한국어 목소리 미리듣기입니다.`
+          };
+
+          const text = previews[langCode] || previews[langCode.split('-')[0]] || 'Hello! This is a voice preview.';
+
+          btn.disabled = true;
+          const originalHTML = btn.innerHTML;
+          btn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px; border-width: 2px; border-top-color: #fff; margin-right: 4px;"></div> Playing...';
+
+          try {
+            const res = await API.post('/tts', { text, voice: voiceId, speed: 1.0, pitch: 1.0, volume: 1.0 });
+            if (res.success && res.history) {
+              playGeneratedAudio(res.history.audio_url);
+              showToast(`Playing preview for ${voiceName}...`, 'info');
+              await loadHistory();
+            } else {
+              showToast(res.message || 'Failed to synthesize preview.', 'error');
+            }
+          } catch (e) {
+            showToast('Preview error occurred.', 'error');
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
           }
         });
       });
@@ -644,7 +874,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const username = document.getElementById('profile-username').value.trim();
       const email = document.getElementById('profile-email').value.trim();
 
+      const submitBtn = profileForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<div class="spinner" style="width: 14px; height: 14px; border-width: 2px; border-top-color: #fff; margin-right: 4px;"></div> Updating...`;
+
       const res = await API.put('/profile', { username, email });
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+
       if (res.success) {
         showToast('Profile updated successfully!', 'success');
         await loadUserData();
@@ -660,7 +898,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const current_password = document.getElementById('current-password').value;
       const new_password = document.getElementById('new-password').value;
 
+      const submitBtn = passwordForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<div class="spinner" style="width: 14px; height: 14px; border-width: 2px; border-top-color: #fff; margin-right: 4px;"></div> Updating...`;
+
       const res = await API.put('/profile/password', { current_password, new_password });
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+
       if (res.success) {
         showToast('Password updated successfully!', 'success');
         passwordForm.reset();
@@ -673,14 +919,90 @@ document.addEventListener('DOMContentLoaded', () => {
   if (deleteAccountBtn) {
     deleteAccountBtn.addEventListener('click', async () => {
       if (confirm('CAUTION: Are you sure you want to permanently delete your account? This action cannot be undone.')) {
+        const originalText = deleteAccountBtn.innerHTML;
+        deleteAccountBtn.disabled = true;
+        deleteAccountBtn.innerHTML = 'Deleting...';
+
         const res = await API.delete('/profile');
         if (res.success) {
           AuthToken.remove();
           showToast('Account deleted.', 'info');
           setTimeout(() => window.location.href = '/login', 800);
+        } else {
+          deleteAccountBtn.disabled = false;
+          deleteAccountBtn.innerHTML = originalText;
+          showToast(res.message || 'Account deletion failed.', 'error');
         }
       }
     });
+  }
+
+  // --- Verification Banner & Modal Handlers ---
+  function setupVerificationHandlers() {
+    const verifyBanner = document.getElementById('email-verify-banner');
+    const triggerBtn = document.getElementById('trigger-verify-modal-btn');
+    const resendBtn = document.getElementById('resend-verify-email-btn');
+    const modal = document.getElementById('verify-modal');
+    const closeBtn = document.getElementById('close-verify-modal-btn');
+    const form = document.getElementById('verify-email-form');
+
+    if (triggerBtn && modal) {
+      triggerBtn.addEventListener('click', () => modal.classList.add('open'));
+    }
+
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => modal.classList.remove('open'));
+    }
+
+    if (resendBtn) {
+      resendBtn.addEventListener('click', async () => {
+        resendBtn.disabled = true;
+        const originalText = resendBtn.innerHTML;
+        resendBtn.innerHTML = 'Resending...';
+
+        const res = await API.post('/auth/resend-verification');
+        resendBtn.disabled = false;
+        resendBtn.innerHTML = originalText;
+
+        if (res.success) {
+          showToast('Verification code resent successfully.', 'success');
+        } else {
+          showToast(res.message || 'Failed to resend code.', 'error');
+        }
+      });
+    }
+
+    if (form && modal) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const codeInput = document.getElementById('verification-input-code');
+        const code = codeInput.value.trim();
+
+        if (!code) {
+          showToast('Please enter the verification code.', 'warning');
+          return;
+        }
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Verifying...';
+
+        const res = await API.post('/auth/verify-email', { code });
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+
+        if (res.success) {
+          showToast('Email verified successfully!', 'success');
+          modal.classList.remove('open');
+          form.reset();
+          if (currentUser) currentUser.email_verified = true;
+          if (verifyBanner) verifyBanner.style.display = 'none';
+        } else {
+          showToast(res.message || 'Invalid code. Verification failed.', 'error');
+        }
+      });
+    }
   }
 
   // --- Keyboard Shortcuts Listener ---
