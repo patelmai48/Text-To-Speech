@@ -701,9 +701,9 @@ a:hover {
 }
 
 .btn-danger {
-  background: rgba(239, 68, 68, 0.12);
+  background: rgba(242, 69, 69, 0.12);
   color: var(--accent-rose);
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  border: 1px solid rgba(244, 106, 106, 0.25);
 }
 
 .btn-danger:hover {
@@ -955,8 +955,8 @@ a:hover {
 
 /* Input Autofill Styling Overrides */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 30px var(--bg-secondary) inset !important;
   -webkit-text-fill-color: var(--text-primary) !important;
@@ -1888,11 +1888,13 @@ input:-webkit-autofill:active {
   margin-top: 12px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
+
 .btn-google:hover {
   background: #f8fafc;
   border-color: #cbd5e1;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
+
 .btn-google:active {
   transform: scale(0.98);
 }
@@ -1910,12 +1912,14 @@ input:-webkit-autofill:active {
   gap: 16px;
   flex-wrap: wrap;
 }
+
 .verify-banner-text {
   display: flex;
   align-items: center;
   gap: 12px;
   color: var(--text-primary);
 }
+
 .verify-banner-text i {
   color: var(--accent-amber);
   font-size: 1.4rem;
@@ -1939,10 +1943,12 @@ input:-webkit-autofill:active {
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
+
 .modal-overlay.open {
   opacity: 1;
   pointer-events: auto;
 }
+
 .modal-container {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -1954,6 +1960,7 @@ input:-webkit-autofill:active {
   transform: translateY(20px);
   transition: transform 0.3s ease;
 }
+
 .modal-overlay.open .modal-container {
   transform: translateY(0);
 }
