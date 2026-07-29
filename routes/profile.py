@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import re
 from flask import Blueprint, request, jsonify
 from models import db, User, History, Favorite
-from routes.auth import token_required
+from routes.auth import token_required, verification_required
 
 profile_bp = Blueprint('profile', __name__)
 
@@ -42,6 +42,7 @@ def get_profile(current_user):
 
 @profile_bp.route('/profile', methods=['PUT'])
 @token_required
+@verification_required
 def update_profile(current_user):
     """Update user username and/or email address."""
     data = request.get_json() or {}
@@ -80,6 +81,7 @@ def update_profile(current_user):
 
 @profile_bp.route('/profile/password', methods=['PUT'])
 @token_required
+@verification_required
 def change_password(current_user):
     """Change current user's password."""
     data = request.get_json() or {}
@@ -105,6 +107,7 @@ def change_password(current_user):
 
 @profile_bp.route('/profile', methods=['DELETE'])
 @token_required
+@verification_required
 def delete_account(current_user):
     """Permanently delete user account and associated records."""
     db.session.delete(current_user)

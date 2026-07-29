@@ -1,6 +1,7 @@
 import os
 import uuid
 import re
+import requests
 from collections import Counter
 from gtts import gTTS
 
@@ -39,6 +40,34 @@ def get_voice_meta(voice_id):
     # Default fallback to English US
     return SUPPORTED_LANGUAGES[0]
 
+def translate_text(text, target_lang):
+    """
+    Translates text to the target language code using Google Translate's free API.
+    If the translation fails or the language matches, it returns the original text.
+    """
+    text = text.strip()
+    if not text:
+        return ""
+    try:
+        url = "https://translate.googleapis.com/translate_a/single"
+        params = {
+            "client": "gtx",
+            "sl": "auto",
+            "tl": target_lang,
+            "dt": "t",
+            "q": text
+        }
+        response = requests.get(url, params=params, timeout=5)
+        if response.status_code == 200:
+            result = response.json()
+            translated_parts = [part[0] for part in result[0] if part[0]]
+            translated_text = "".join(translated_parts)
+            if translated_text.strip():
+                return translated_text
+    except Exception as e:
+        pass
+    return text
+
 def generate_speech(text, voice_id="en-us", speed=1.0, output_folder="static/audio"):
     """
     Synthesize text into speech MP3 using gTTS or Microsoft Edge TTS.
@@ -47,12 +76,14 @@ def generate_speech(text, voice_id="en-us", speed=1.0, output_folder="static/aud
     if not text or not text.strip():
         raise ValueError("Text content cannot be empty.")
 
-    cleaned_text = text.strip()
-    char_count = len(cleaned_text)
-
     meta = get_voice_meta(voice_id)
     lang = meta["code"]
     tld = meta["tld"]
+
+    # Translate text to target language of the voice
+    translated_text = translate_text(text, lang)
+    cleaned_text = translated_text.strip()
+    char_count = len(cleaned_text)
 
     # gTTS slow mode check for lower speeds
     is_slow = speed < 0.8

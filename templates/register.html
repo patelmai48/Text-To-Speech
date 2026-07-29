@@ -107,38 +107,12 @@
         </svg>
         <span style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">Sign in with Google</span>
       </div>
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">Choose an account to continue to <strong>VoxAI Studio</strong></p>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">Enter your Gmail address to continue to <strong>VoxAI Studio</strong></p>
       
-      <div class="sim-preset-accounts" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
-        <button type="button" class="sim-account-btn" data-email="google-test@example.com" data-username="Google Test User">
-          <div class="sim-avatar">T</div>
-          <div style="text-align: left;">
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">Google Test User</div>
-            <div style="color: var(--text-muted); font-size: 0.8rem;">google-test@example.com</div>
-          </div>
-        </button>
-
-        <button type="button" class="sim-account-btn" data-email="google-dev@example.com" data-username="Google Dev">
-          <div class="sim-avatar" style="background: var(--accent-secondary);">G</div>
-          <div style="text-align: left;">
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">Google Dev</div>
-            <div style="color: var(--text-muted); font-size: 0.8rem;">google-dev@example.com</div>
-          </div>
-        </button>
-
-        <button type="button" class="sim-account-btn" id="sim-custom-account-btn">
-          <div class="sim-avatar" style="background: var(--bg-tertiary); color: var(--text-secondary);"><i class="bi bi-person-plus-fill"></i></div>
-          <div style="text-align: left;">
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">Use another account</div>
-            <div style="color: var(--text-muted); font-size: 0.8rem;">Type a custom email</div>
-          </div>
-        </button>
-      </div>
-
-      <div id="sim-custom-input-panel" style="display: none; margin-bottom: 20px;">
+      <div id="sim-custom-input-panel" style="margin-bottom: 20px;">
         <label class="control-label" for="sim-custom-email">Email Address</label>
         <div style="display: flex; gap: 8px;">
-          <input type="email" id="sim-custom-email" class="input-custom" placeholder="name@example.com" style="padding: 8px 12px; font-size: 0.9rem;">
+          <input type="email" id="sim-custom-email" class="input-custom" placeholder="name@example.com" style="padding: 8px 12px; font-size: 0.9rem;" required>
           <button type="button" class="btn btn-primary" id="sim-custom-submit-btn" style="padding: 8px 16px; font-size: 0.9rem;">Next</button>
         </div>
       </div>

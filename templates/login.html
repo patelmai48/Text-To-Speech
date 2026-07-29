@@ -49,8 +49,6 @@
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <label class="control-label" for="password" style="margin-bottom: 0;">Password</label>
-              <a href="#" id="show-forgot-btn"
-                style="font-size: 0.8rem; color: var(--accent-primary); text-decoration: none;">Forgot password?</a>
             </div>
             <input type="password" id="password" class="input-custom" placeholder="••••••••" required>
           </div>
@@ -88,57 +86,7 @@
         </p>
       </div>
 
-      <!-- 2. FORGOT PASSWORD REQUEST FORM -->
-      <form class="auth-form" id="forgot-form" style="display: none;">
-        <h1 class="auth-title" style="font-size: 1.8rem;">Reset Password</h1>
-        <p class="auth-subtitle">Enter your email to receive a password reset code</p>
 
-        <div>
-          <label class="control-label" for="forgot-email">Email Address</label>
-          <input type="email" id="forgot-email" class="input-custom" placeholder="john@example.com" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
-          Send Reset Code <i class="bi bi-send"></i>
-        </button>
-
-        <p style="margin-top: 20px; font-size: 0.9rem;">
-          <a href="#" id="back-to-login-btn" style="color: var(--text-secondary); text-decoration: none;"><i
-              class="bi bi-arrow-left"></i> Back to Login</a>
-        </p>
-      </form>
-
-      <!-- 3. RESET PASSWORD CONFIRM FORM -->
-      <form class="auth-form" id="reset-form" style="display: none;">
-        <h1 class="auth-title" style="font-size: 1.8rem;">Change Password</h1>
-        <p class="auth-subtitle">Enter the 6-digit reset code and your new password</p>
-
-        <input type="hidden" id="reset-email">
-
-        <div>
-          <label class="control-label" for="reset-code">Reset Code</label>
-          <input type="text" id="reset-code" class="input-custom" placeholder="6-digit code" required>
-        </div>
-
-        <div>
-          <label class="control-label" for="reset-new-password">New Password</label>
-          <input type="password" id="reset-new-password" class="input-custom" placeholder="Min 6 characters" required>
-        </div>
-
-        <div>
-          <label class="control-label" for="reset-confirm-password">Confirm Password</label>
-          <input type="password" id="reset-confirm-password" class="input-custom" placeholder="••••••••" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
-          Update Password <i class="bi bi-check-circle"></i>
-        </button>
-
-        <p style="margin-top: 20px; font-size: 0.9rem;">
-          <a href="#" id="back-to-login-btn-2" style="color: var(--text-secondary); text-decoration: none;"><i
-              class="bi bi-arrow-left"></i> Back to Login</a>
-        </p>
-      </form>
 
     </div>
 
@@ -160,38 +108,12 @@
         </svg>
         <span style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">Sign in with Google</span>
       </div>
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">Choose an account to continue to <strong>VoxAI Studio</strong></p>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">Enter your Gmail address to continue to <strong>VoxAI Studio</strong></p>
       
-      <div class="sim-preset-accounts" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
-        <button type="button" class="sim-account-btn" data-email="google-test@example.com" data-username="Google Test User">
-          <div class="sim-avatar">T</div>
-          <div style="text-align: left;">
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">Google Test User</div>
-            <div style="color: var(--text-muted); font-size: 0.8rem;">google-test@example.com</div>
-          </div>
-        </button>
-
-        <button type="button" class="sim-account-btn" data-email="google-dev@example.com" data-username="Google Dev">
-          <div class="sim-avatar" style="background: var(--accent-secondary);">G</div>
-          <div style="text-align: left;">
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">Google Dev</div>
-            <div style="color: var(--text-muted); font-size: 0.8rem;">google-dev@example.com</div>
-          </div>
-        </button>
-
-        <button type="button" class="sim-account-btn" id="sim-custom-account-btn">
-          <div class="sim-avatar" style="background: var(--bg-tertiary); color: var(--text-secondary);"><i class="bi bi-person-plus-fill"></i></div>
-          <div style="text-align: left;">
-            <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">Use another account</div>
-            <div style="color: var(--text-muted); font-size: 0.8rem;">Type a custom email</div>
-          </div>
-        </button>
-      </div>
-
-      <div id="sim-custom-input-panel" style="display: none; margin-bottom: 20px;">
+      <div id="sim-custom-input-panel" style="margin-bottom: 20px;">
         <label class="control-label" for="sim-custom-email">Email Address</label>
         <div style="display: flex; gap: 8px;">
-          <input type="email" id="sim-custom-email" class="input-custom" placeholder="name@example.com" style="padding: 8px 12px; font-size: 0.9rem;">
+          <input type="email" id="sim-custom-email" class="input-custom" placeholder="name@example.com" style="padding: 8px 12px; font-size: 0.9rem;" required>
           <button type="button" class="btn btn-primary" id="sim-custom-submit-btn" style="padding: 8px 16px; font-size: 0.9rem;">Next</button>
         </div>
       </div>

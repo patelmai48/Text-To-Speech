@@ -5,37 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('login-form');
   const registerForm = document.getElementById('register-form');
-  const forgotForm = document.getElementById('forgot-form');
-  const resetForm = document.getElementById('reset-form');
-
-  const showForgotBtn = document.getElementById('show-forgot-btn');
-  const backToLoginBtn = document.getElementById('back-to-login-btn');
-  const backToLoginBtn2 = document.getElementById('back-to-login-btn-2');
-
   // --- View Toggle Helpers ---
-  if (showForgotBtn) {
-    showForgotBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      loginForm.style.display = 'none';
-      forgotForm.style.display = 'block';
-    });
-  }
-
-  if (backToLoginBtn) {
-    backToLoginBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      forgotForm.style.display = 'none';
-      loginForm.style.display = 'block';
-    });
-  }
-
-  if (backToLoginBtn2) {
-    backToLoginBtn2.addEventListener('click', (e) => {
-      e.preventDefault();
-      resetForm.style.display = 'none';
-      loginForm.style.display = 'block';
-    });
-  }
 
   // --- Login Form Submission ---
   if (loginForm) {
@@ -119,88 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Forgot Password Submission ---
-  if (forgotForm) {
-    forgotForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const emailInput = document.getElementById('forgot-email');
-      const email = emailInput.value.trim();
 
-      if (!email) {
-        showToast('Please enter your email address.', 'warning');
-        return;
-      }
-
-      const submitBtn = forgotForm.querySelector('button[type="submit"]');
-      const originalText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<div class="spinner"></div> Processing...`;
-
-      const result = await API.post('/auth/forgot-password', { email });
-
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalText;
-
-      if (result.success) {
-        showToast('If the email exists, a 6-digit reset code has been sent.', 'success');
-        // Pre-fill email in reset form and transition to reset form
-        document.getElementById('reset-email').value = email;
-        forgotForm.style.display = 'none';
-        resetForm.style.display = 'block';
-      } else {
-        showToast(result.message || 'Failed to request reset.', 'error');
-      }
-    });
-  }
-
-  // --- Reset Password Submission ---
-  if (resetForm) {
-    resetForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('reset-email').value.trim();
-      const code = document.getElementById('reset-code').value.trim();
-      const newPassword = document.getElementById('reset-new-password').value;
-      const confirmPassword = document.getElementById('reset-confirm-password').value;
-
-      if (!code || !newPassword || !confirmPassword) {
-        showToast('Please fill in all reset fields.', 'warning');
-        return;
-      }
-
-      if (newPassword !== confirmPassword) {
-        showToast('Passwords do not match.', 'error');
-        return;
-      }
-
-      if (newPassword.length < 6) {
-        showToast('Password must be at least 6 characters.', 'warning');
-        return;
-      }
-
-      const submitBtn = resetForm.querySelector('button[type="submit"]');
-      const originalText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<div class="spinner"></div> Resetting...`;
-
-      const result = await API.post('/auth/reset-password', {
-        email,
-        code,
-        new_password: newPassword
-      });
-
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalText;
-
-      if (result.success) {
-        showToast('Password reset successfully! You can now log in.', 'success');
-        resetForm.reset();
-        resetForm.style.display = 'none';
-        loginForm.style.display = 'block';
-      } else {
-        showToast(result.message || 'Password reset failed.', 'error');
-      }
-    });
-  }
 
   // --- Google Sign-In Callbacks & Fallback handlers ---
   window.handleGoogleSignIn = async (response) => {
@@ -230,21 +119,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (googleBtn && googleSimModal) {
     googleBtn.addEventListener('click', () => {
-      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const simPresetAccounts = googleSimModal.querySelector('.sim-preset-accounts');
-      
-      if (isLocalhost) {
-        if (simPresetAccounts) simPresetAccounts.style.display = 'flex';
-        if (simCustomInputPanel) simCustomInputPanel.style.display = 'none';
-      } else {
-        if (simPresetAccounts) simPresetAccounts.style.display = 'none';
-        if (simCustomInputPanel) simCustomInputPanel.style.display = 'block';
-        if (simCustomEmail) {
-          setTimeout(() => simCustomEmail.focus(), 100);
-        }
+      if (simCustomInputPanel) simCustomInputPanel.style.display = 'block';
+      if (simCustomEmail) {
+        simCustomEmail.value = '';
+        setTimeout(() => simCustomEmail.focus(), 100);
       }
-
-      if (simCustomEmail) simCustomEmail.value = '';
       googleSimModal.style.display = 'flex';
       googleSimModal.classList.add('open');
     });

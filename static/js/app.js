@@ -182,11 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Check verification status
       const verifyBanner = document.getElementById('email-verify-banner');
       if (verifyBanner) {
-        if (!currentUser.email_verified) {
-          verifyBanner.style.display = 'flex';
-        } else {
-          verifyBanner.style.display = 'none';
-        }
+        verifyBanner.style.display = 'none';
       }
 
       // Update Dashboard Stats Cards
@@ -273,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (summarizeBtn) {
       summarizeBtn.addEventListener('click', async () => {
+        if (!checkVerificationState()) return;
         const text = textEditor.value.trim();
         if (!text) {
           showToast('Please enter text to summarize.', 'warning');
@@ -300,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Favorite Voice Toggle Button
     if (favVoiceBtn) {
       favVoiceBtn.addEventListener('click', async () => {
+        if (!checkVerificationState()) return;
         const selectedVoice = voiceSelect.value;
         const res = await API.post('/favorites', { item_type: 'voice', item_value: selectedVoice });
         if (res.success) {
@@ -333,6 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Speech Conversion API Handler ---
   async function handleSpeechConversion() {
+    if (!checkVerificationState()) return;
     const text = textEditor.value.trim();
     if (!text) {
       showToast('Please enter text to synthesize.', 'warning');
@@ -395,7 +394,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     currentAudio.addEventListener('ended', () => {
       if (playPauseBtn) playPauseBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+      updateHistoryButtonsState();
     });
+
+    currentAudio.addEventListener('play', updateHistoryButtonsState);
+    currentAudio.addEventListener('pause', updateHistoryButtonsState);
   }
 
   function playGeneratedAudio(audioUrl) {
@@ -639,8 +642,28 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.play-history-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const url = btn.getAttribute('data-url');
-          playGeneratedAudio(url);
-          showToast('Playing audio snippet...', 'info');
+          if (!url) return;
+
+          let btnPath = '';
+          try {
+            btnPath = new URL(url, window.location.origin).pathname;
+          } catch (e) {
+            btnPath = url;
+          }
+          const currentSrc = currentAudio.src ? new URL(currentAudio.src).pathname : '';
+
+          if (btnPath === currentSrc) {
+            if (currentAudio.paused || currentAudio.ended) {
+              currentAudio.play();
+              showToast('Resuming audio snippet...', 'info');
+            } else {
+              currentAudio.pause();
+              showToast('Pausing audio snippet...', 'info');
+            }
+          } else {
+            playGeneratedAudio(url);
+            showToast('Playing audio snippet...', 'info');
+          }
         });
       });
 
@@ -669,6 +692,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
       });
+
+      updateHistoryButtonsState();
     }
   }
 
@@ -692,15 +717,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const downloadHistoryFile = async (endpoint, extension) => {
+    try {
+      const username = currentUser ? currentUser.username : 'user';
+      const filename = `tts_history_${username}.${extension}`;
+      
+      const token = AuthToken.get();
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to export history file.');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      showToast('Failed to export history. Please try again.', 'error');
+      console.error(err);
+    }
+  };
+
   if (exportCsvBtn) {
     exportCsvBtn.addEventListener('click', () => {
-      window.open('/api/history/export/csv', '_blank');
+      downloadHistoryFile('/api/history/export/csv', 'csv');
     });
   }
 
   if (exportPdfBtn) {
     exportPdfBtn.addEventListener('click', () => {
-      window.open('/api/history/export/pdf', '_blank');
+      downloadHistoryFile('/api/history/export/pdf', 'pdf');
     });
   }
 
@@ -871,6 +929,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (profileForm) {
     profileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!checkVerificationState()) return;
       const username = document.getElementById('profile-username').value.trim();
       const email = document.getElementById('profile-email').value.trim();
 
@@ -895,6 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (passwordForm) {
     passwordForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!checkVerificationState()) return;
       const current_password = document.getElementById('current-password').value;
       const new_password = document.getElementById('new-password').value;
 
@@ -918,6 +978,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (deleteAccountBtn) {
     deleteAccountBtn.addEventListener('click', async () => {
+      if (!checkVerificationState()) return;
       if (confirm('CAUTION: Are you sure you want to permanently delete your account? This action cannot be undone.')) {
         const originalText = deleteAccountBtn.innerHTML;
         deleteAccountBtn.disabled = true;
@@ -937,11 +998,53 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- Verification Checks & Playback Sync Helpers ---
+  function checkVerificationState() {
+    return true;
+  }
+
+  function updateHistoryButtonsState() {
+    if (!currentAudio) return;
+    const currentSrc = currentAudio.src ? new URL(currentAudio.src).pathname : '';
+    const isPlaying = !currentAudio.paused && !currentAudio.ended;
+
+    document.querySelectorAll('.play-history-btn').forEach(btn => {
+      const btnUrl = btn.getAttribute('data-url');
+      if (!btnUrl) return;
+
+      let btnPath = '';
+      try {
+        btnPath = new URL(btnUrl, window.location.origin).pathname;
+      } catch (e) {
+        btnPath = btnUrl;
+      }
+
+      const hasText = btn.textContent.includes('Play') || btn.textContent.includes('Pause');
+
+      if (btnPath === currentSrc && isPlaying) {
+        if (hasText) {
+          btn.innerHTML = '<i class="bi bi-pause-fill"></i> Pause';
+        } else {
+          btn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+        }
+        btn.classList.add('playing');
+      } else {
+        if (hasText) {
+          btn.innerHTML = '<i class="bi bi-play-fill"></i> Play';
+        } else {
+          btn.innerHTML = '<i class="bi bi-play-fill"></i>';
+        }
+        btn.classList.remove('playing');
+      }
+    });
+  }
+
   // --- Verification Banner & Modal Handlers ---
   function setupVerificationHandlers() {
     const verifyBanner = document.getElementById('email-verify-banner');
     const triggerBtn = document.getElementById('trigger-verify-modal-btn');
     const resendBtn = document.getElementById('resend-verify-email-btn');
+    const modalResendBtn = document.getElementById('modal-resend-verify-email-btn');
     const modal = document.getElementById('verify-modal');
     const closeBtn = document.getElementById('close-verify-modal-btn');
     const form = document.getElementById('verify-email-form');
@@ -954,21 +1057,30 @@ document.addEventListener('DOMContentLoaded', () => {
       closeBtn.addEventListener('click', () => modal.classList.remove('open'));
     }
 
+    const handleResend = async (btn) => {
+      btn.disabled = true;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = 'Resending...';
+
+      const res = await API.post('/auth/resend-verification');
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+
+      if (res.success) {
+        showToast('Verification code resent successfully.', 'success');
+      } else {
+        showToast(res.message || 'Failed to resend code.', 'error');
+      }
+    };
+
     if (resendBtn) {
-      resendBtn.addEventListener('click', async () => {
-        resendBtn.disabled = true;
-        const originalText = resendBtn.innerHTML;
-        resendBtn.innerHTML = 'Resending...';
+      resendBtn.addEventListener('click', () => handleResend(resendBtn));
+    }
 
-        const res = await API.post('/auth/resend-verification');
-        resendBtn.disabled = false;
-        resendBtn.innerHTML = originalText;
-
-        if (res.success) {
-          showToast('Verification code resent successfully.', 'success');
-        } else {
-          showToast(res.message || 'Failed to resend code.', 'error');
-        }
+    if (modalResendBtn) {
+      modalResendBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleResend(modalResendBtn);
       });
     }
 

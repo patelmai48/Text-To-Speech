@@ -8,7 +8,7 @@ import csv
 import io
 from flask import Blueprint, request, jsonify, send_file, current_app
 from models import db, History, Favorite
-from routes.auth import token_required
+from routes.auth import token_required, verification_required
 from services.speech import generate_speech, summarize_text, SUPPORTED_LANGUAGES, get_voice_meta
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
@@ -43,6 +43,7 @@ def get_languages():
 
 @tts_bp.route('/tts', methods=['POST'])
 @token_required
+@verification_required
 def create_tts(current_user):
     """Convert text to speech audio, save audio file and log to user history."""
     data = request.get_json() or {}
@@ -108,6 +109,7 @@ def create_tts(current_user):
 
 @tts_bp.route('/tts/summarize', methods=['POST'])
 @token_required
+@verification_required
 def summarize(current_user):
     """Summarize text content before speech conversion."""
     data = request.get_json() or {}
@@ -123,6 +125,7 @@ def summarize(current_user):
 
 @tts_bp.route('/history', methods=['GET'])
 @token_required
+@verification_required
 def get_history(current_user):
     """Retrieve user conversion history with optional search query."""
     search = request.args.get('search', '').strip()
@@ -140,6 +143,7 @@ def get_history(current_user):
 
 @tts_bp.route('/history/<int:history_id>', methods=['DELETE'])
 @token_required
+@verification_required
 def delete_history_item(current_user, history_id):
     """Delete a single history record and its associated audio file."""
     item = History.query.filter_by(id=history_id, user_id=current_user.id).first()
@@ -162,6 +166,7 @@ def delete_history_item(current_user, history_id):
 
 @tts_bp.route('/history', methods=['DELETE'])
 @token_required
+@verification_required
 def delete_all_history(current_user):
     """Clear all conversion history records for current user."""
     items = History.query.filter_by(user_id=current_user.id).all()
@@ -182,6 +187,7 @@ def delete_all_history(current_user):
 
 @tts_bp.route('/history/export/csv', methods=['GET'])
 @token_required
+@verification_required
 def export_csv(current_user):
     """Export history as downloadable CSV file."""
     items = History.query.filter_by(user_id=current_user.id).order_by(History.created_at.desc()).all()
@@ -214,6 +220,7 @@ def export_csv(current_user):
 
 @tts_bp.route('/history/export/pdf', methods=['GET'])
 @token_required
+@verification_required
 def export_pdf(current_user):
     """Export history as downloadable PDF report."""
     items = History.query.filter_by(user_id=current_user.id).order_by(History.created_at.desc()).all()
@@ -264,6 +271,7 @@ def export_pdf(current_user):
 
 @tts_bp.route('/favorites', methods=['GET'])
 @token_required
+@verification_required
 def get_favorites(current_user):
     """Retrieve user favorite voices and languages."""
     favs = Favorite.query.filter_by(user_id=current_user.id).all()
@@ -274,6 +282,7 @@ def get_favorites(current_user):
 
 @tts_bp.route('/favorites', methods=['POST'])
 @token_required
+@verification_required
 def add_favorite(current_user):
     """Add a voice or language to user favorites."""
     data = request.get_json() or {}
@@ -299,6 +308,7 @@ def add_favorite(current_user):
 
 @tts_bp.route('/favorites/<int:fav_id>', methods=['DELETE'])
 @token_required
+@verification_required
 def remove_favorite(current_user, fav_id):
     """Remove item from favorites by ID."""
     fav = Favorite.query.filter_by(id=fav_id, user_id=current_user.id).first()
