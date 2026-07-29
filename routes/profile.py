@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import timezone
 
 # Add parent directory to sys.path to ensure IDE linters and Flask resolve top-level modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -35,7 +36,7 @@ def get_profile(current_user):
             'total_conversions': total_conversions,
             'total_characters': total_characters,
             'favorite_voices_count': favorite_voices_count,
-            'last_login': current_user.last_login.isoformat() if current_user.last_login else None
+            'last_login': current_user.last_login.replace(tzinfo=timezone.utc).isoformat() if current_user.last_login else None
         },
         'recent_conversions': recent_conversions
     }), 200

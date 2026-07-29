@@ -41,8 +41,8 @@ class User(db.Model):
             'username': self.username,
             'email': self.email,
             'email_verified': self.email_verified,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'last_login': self.last_login.isoformat() if self.last_login else None
+            'created_at': self.created_at.replace(tzinfo=timezone.utc).isoformat() if self.created_at else None,
+            'last_login': self.last_login.replace(tzinfo=timezone.utc).isoformat() if self.last_login else None
         }
 
 class History(db.Model):
@@ -77,7 +77,7 @@ class History(db.Model):
             'audio_filename': self.audio_filename,
             'audio_url': f'/static/audio/{self.audio_filename}' if self.audio_filename else None,
             'character_count': self.character_count,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': self.created_at.replace(tzinfo=timezone.utc).isoformat() if self.created_at else None
         }
 
 class Favorite(db.Model):
@@ -99,5 +99,5 @@ class Favorite(db.Model):
             'user_id': self.user_id,
             'item_type': self.item_type,
             'item_value': self.item_value,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': self.created_at.replace(tzinfo=timezone.utc).isoformat() if self.created_at else None
         }
