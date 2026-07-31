@@ -525,16 +525,16 @@ a:hover {
 
 .text-editor {
   width: 100%;
-  min-height: 220px;
-  max-height: 400px;
+  min-height: 340px;
+  max-height: 600px;
   background: var(--bg-secondary);
   border: 1px solid var(--glass-border);
   border-radius: var(--input-radius);
-  padding: 16px;
+  padding: 20px 22px;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 1.05rem;
-  line-height: 1.6;
+  font-size: 1.15rem;
+  line-height: 1.8;
   resize: vertical;
   outline: none;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
@@ -1295,12 +1295,12 @@ input:-webkit-autofill:active {
 
 /* --- Text Editor (TTS Studio) --- */
 .text-editor {
-  min-height: 280px;
+  min-height: 380px;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--glass-border);
-  padding: 20px;
-  font-size: 1.1rem;
-  line-height: 1.7;
+  padding: 22px 24px;
+  font-size: 1.2rem;
+  line-height: 1.85;
   border-radius: var(--input-radius);
   transition: all var(--transition-fast);
   color: var(--text-primary);
