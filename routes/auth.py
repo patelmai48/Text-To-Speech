@@ -370,13 +370,17 @@ def google_auth():
             return jsonify({'success': False, 'message': 'Google Sign-In is not configured on this server.'}), 501
 
         try:
-            resp = requests.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={credential}", timeout=5)
+            resp = requests.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={credential}", timeout=8)
             if resp.status_code != 200:
+                current_app.logger.warning(f"Google tokeninfo HTTP {resp.status_code}: {resp.text}")
                 return jsonify({'success': False, 'message': 'Invalid Google ID token.'}), 401
             
             payload = resp.json()
-            if payload.get('aud') != client_id:
-                return jsonify({'success': False, 'message': 'Google token audience mismatch.'}), 401
+            aud = payload.get('aud', '')
+            azp = payload.get('azp', '')
+            if aud != client_id and azp != client_id:
+                current_app.logger.warning(f"Google token audience mismatch: aud={aud}, azp={azp}, expected={client_id}")
+                return jsonify({'success': False, 'message': f'Google token audience mismatch (expected {client_id[:12]}...).'}), 401
 
             if str(payload.get('email_verified', '')).lower() not in ('true', '1'):
                 return jsonify({'success': False, 'message': 'Google email address is not verified by Google.'}), 401

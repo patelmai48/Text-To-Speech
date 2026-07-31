@@ -72,13 +72,17 @@ const API = {
       if (response.status === 401) {
         // Token expired or invalid
         AuthToken.remove();
+        let errJson = null;
+        try { errJson = await response.json(); } catch(e) {}
+        const msg = (errJson && errJson.message) ? errJson.message : 'Unauthorized';
+
         if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
           showToast('Session expired. Please log in again.', 'warning');
           setTimeout(() => {
             window.location.href = '/login';
           }, 1200);
         }
-        return { success: false, message: 'Unauthorized' };
+        return { success: false, message: msg };
       }
 
       if (isBlob) {
