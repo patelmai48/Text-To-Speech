@@ -355,17 +355,17 @@ def google_auth():
     email = None
     username = None
 
-    # Handle simulation mode for testing/development
+    # Handle simulation mode for automated testing only
     is_simulated = (credential == "simulated_google_token")
     if is_simulated:
-        if not current_app.config.get('DEBUG', False):
-            return jsonify({'success': False, 'message': 'Google Sign-In not configured'}), 501
+        if not current_app.config.get('TESTING', False):
+            return jsonify({'success': False, 'message': 'Google Sign-In simulation is disabled in production.'}), 401
         email = data.get('email', 'google-test@example.com').lower()
         username = data.get('username', email.split('@')[0])
     else:
         client_id = current_app.config.get('GOOGLE_CLIENT_ID')
-        if not client_id:
-            return jsonify({'success': False, 'message': 'Google Sign-In not configured'}), 501
+        if not client_id or client_id.startswith('your-google-client-id'):
+            return jsonify({'success': False, 'message': 'Google Sign-In is not configured on this server.'}), 501
 
         try:
             resp = requests.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={credential}", timeout=5)
@@ -375,6 +375,9 @@ def google_auth():
             payload = resp.json()
             if payload.get('aud') != client_id:
                 return jsonify({'success': False, 'message': 'Google token audience mismatch.'}), 401
+
+            if str(payload.get('email_verified', '')).lower() not in ('true', '1'):
+                return jsonify({'success': False, 'message': 'Google email address is not verified by Google.'}), 401
 
             email = payload.get('email', '').lower()
             username = payload.get('name', email.split('@')[0])
@@ -387,31 +390,29 @@ def google_auth():
 
     user = User.query.filter_by(email=email).first()
     if not user:
-        base_username = username
+        if is_simulated:
+            return jsonify({'success': False, 'message': 'No account found with this email address. Please register first.'}), 404
+
+        # Auto-create verified user account for authentic Google Sign-In
+        clean_username = re.sub(r'[^a-zA-Z0-9_]', '', username or email.split('@')[0]) or "user"
+        unique_username = clean_username
         counter = 1
-        while User.query.filter_by(username=username).first():
-            username = f"{base_username}{counter}"
+        while User.query.filter_by(username=unique_username).first():
+            unique_username = f"{clean_username}{counter}"
             counter += 1
 
-        user = User(username=username, email=email, email_verified=True)
-        user.set_password(uuid.uuid4().hex)
-        
+        user = User(
+            username=unique_username,
+            email=email,
+            email_verified=True
+        )
+        user.set_password(os.urandom(24).hex())
         db.session.add(user)
         db.session.commit()
-        
-        # Send welcome email for new Google registrations!
-        welcome_body = f"""
-        <h2>Welcome to VoxAI Studio! 🎙️✨</h2>
-        <p>Hello {username},</p>
-        <p>Thank you for signing in with Google. We are thrilled to have you at VoxAI Studio!</p>
-        <p>You can now start converting your scripts into realistic neural speech across multiple languages.</p>
-        <p>Regards,<br>VoxAI Studio Team</p>
-        """
-        send_email(email, "Welcome to VoxAI Studio! 🎙️✨", welcome_body)
-    else:
-        user.email_verified = True
-        user.last_login = datetime.now(timezone.utc)
-        db.session.commit()
+
+    user.email_verified = True
+    user.last_login = datetime.now(timezone.utc)
+    db.session.commit()
 
     token_payload = {
         'user_id': user.id,

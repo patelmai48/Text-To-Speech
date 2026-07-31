@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 import pytest
 
 def test_register_success(client):
@@ -87,14 +88,22 @@ def test_forgot_and_reset_password(client, test_user):
         })
         assert login_resp.status_code == 200
 
-def test_google_auth_simulation(client):
-    response = client.post('/api/auth/google', json={
+def test_google_auth_simulation(client, test_user):
+    # Non-existing user attempt should fail with 404
+    fail_resp = client.post('/api/auth/google', json={
         'credential': 'simulated_google_token',
-        'email': 'googleuser@example.com',
-        'username': 'googleuser'
+        'email': 'nonexistent@example.com'
     })
-    assert response.status_code == 200
-    data = response.get_json()
+    assert fail_resp.status_code == 404
+    assert fail_resp.get_json()['success'] is False
+
+    # Existing user attempt should succeed
+    success_resp = client.post('/api/auth/google', json={
+        'credential': 'simulated_google_token',
+        'email': 'test@example.com'
+    })
+    assert success_resp.status_code == 200
+    data = success_resp.get_json()
     assert data['success'] is True
     assert 'token' in data
 

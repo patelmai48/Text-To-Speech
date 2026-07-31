@@ -2,6 +2,7 @@
 Unit tests for services/speech.py pure functions.
 No actual TTS API calls are made — only pure Python functions are tested.
 """
+# pyrefly: ignore [missing-import]
 import pytest
 from services.speech import (
     SUPPORTED_LANGUAGES,
