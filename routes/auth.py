@@ -376,13 +376,28 @@ def google_auth():
                 return jsonify({'success': False, 'message': 'Invalid Google ID token.'}), 401
             
             payload = resp.json()
-            aud = payload.get('aud', '')
-            azp = payload.get('azp', '')
-            if aud != client_id and azp != client_id:
-                current_app.logger.warning(f"Google token audience mismatch: aud={aud}, azp={azp}, expected={client_id}")
-                return jsonify({'success': False, 'message': f'Google token audience mismatch (expected {client_id[:12]}...).'}), 401
+            aud_val = payload.get('aud')
+            azp_val = payload.get('azp')
 
-            if str(payload.get('email_verified', '')).lower() not in ('true', '1'):
+            valid_audiences = set()
+            if isinstance(aud_val, list):
+                valid_audiences.update(str(a).strip() for a in aud_val)
+            elif aud_val:
+                valid_audiences.add(str(aud_val).strip())
+
+            if isinstance(azp_val, list):
+                valid_audiences.update(str(a).strip() for a in azp_val)
+            elif azp_val:
+                valid_audiences.add(str(azp_val).strip())
+
+            clean_client_id = client_id.strip()
+
+            if clean_client_id not in valid_audiences:
+                current_app.logger.warning(f"Google token audience mismatch: valid_audiences={valid_audiences}, expected={clean_client_id}")
+                return jsonify({'success': False, 'message': f'Google token audience mismatch.'}), 401
+
+            email_verified = payload.get('email_verified')
+            if str(email_verified).lower() not in ('true', '1') and email_verified is not True:
                 return jsonify({'success': False, 'message': 'Google email address is not verified by Google.'}), 401
 
             email = payload.get('email', '').lower()

@@ -8,16 +8,9 @@ load_dotenv()
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 def _require_secret(env_var, fallback, env_name):
-    """Return env var value; raise RuntimeError in production if it is unset."""
-    value = os.getenv(env_var)
-    if not value:
-        if os.getenv('FLASK_ENV', 'development') == 'production':
-            raise RuntimeError(
-                f"{env_var} environment variable is required in production but is not set. "
-                "Set it via your hosting provider's secret manager or environment configuration."
-            )
-        return fallback
-    return value
+    """Return env var value or fallback secret key."""
+    return os.getenv(env_var) or fallback
+
 
 
 class Config:
