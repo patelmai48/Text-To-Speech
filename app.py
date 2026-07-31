@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, jsonify, send_from_directory
+import secrets
+from flask import Flask, render_template, jsonify, send_from_directory, g
 from flask_cors import CORS
 # pyrefly: ignore [missing-import]
 # pyrefly: ignore [missing-import]
@@ -10,6 +11,23 @@ from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 # pyrefly: ignore [missing-import]
 from flask_talisman import Talisman
+
+# Sentry — only activates when SENTRY_DSN env var is set
+try:
+    # pyrefly: ignore [missing-import]
+    import sentry_sdk
+    # pyrefly: ignore [missing-import]
+    from sentry_sdk.integrations.flask import FlaskIntegration
+    _SENTRY_DSN = os.getenv('SENTRY_DSN', '')
+    if _SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=_SENTRY_DSN,
+            integrations=[FlaskIntegration()],
+            traces_sample_rate=0.2,
+            send_default_pii=False
+        )
+except ImportError:
+    pass  # sentry-sdk not installed; silently skip
 
 from config import config_by_name
 from models import db
@@ -28,6 +46,15 @@ def create_app(config_name=None):
     # Ensure audio output directory exists
     os.makedirs(app.config['AUDIO_FOLDER'], exist_ok=True)
 
+    # --- CSP nonce helper ---
+    # A fresh nonce is generated per-request; templates access it via {{ csp_nonce() }}
+    def _get_nonce():
+        if not hasattr(g, '_csp_nonce'):
+            g._csp_nonce = secrets.token_urlsafe(16)
+        return g._csp_nonce
+
+    app.jinja_env.globals['csp_nonce'] = _get_nonce
+
     # Initialize Extensions
     db.init_app(app)
     Migrate(app, db)
@@ -37,7 +64,7 @@ def create_app(config_name=None):
     is_testing = config_name == 'testing' or app.config.get('TESTING', False)
     csp = {
         'default-src': ["'self'"],
-        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://accounts.google.com", "https://cdn.jsdelivr.net"],
+        'script-src': ["'self'", "'nonce-{nonce}'", "https://accounts.google.com", "https://cdn.jsdelivr.net"],
         'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
         'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "data:"],
         'img-src': ["'self'", "data:", "https://*"],
@@ -47,13 +74,16 @@ def create_app(config_name=None):
     Talisman(
         app,
         content_security_policy=csp,
+        content_security_policy_nonce_in=['script-src'],
         force_https=not is_testing and not app.debug,
         session_cookie_secure=not is_testing and not app.debug
     )
 
-    # Configurable CORS origins
-    allowed_origins = os.getenv('ALLOWED_ORIGINS', '*').split(',')
-    CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
+    # Configurable CORS origins — defaults to same-origin (no cross-origin access)
+    # Set ALLOWED_ORIGINS=https://yourdomain.com in env to allow specific origins
+    cors_origins_raw = os.getenv('ALLOWED_ORIGINS', '')
+    allowed_origins = [o.strip() for o in cors_origins_raw.split(',') if o.strip()] or []
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins if allowed_origins else []}}, supports_credentials=False)
 
     # Rate Limiter
     redis_url = os.getenv('REDIS_URL', 'memory://')
@@ -161,6 +191,8 @@ def create_app(config_name=None):
                         conn.execute(db.text("ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT 0 NOT NULL"))
                     if 'verification_code' not in columns:
                         conn.execute(db.text("ALTER TABLE users ADD COLUMN verification_code VARCHAR(32)"))
+                    if 'verification_code_expiry' not in columns:
+                        conn.execute(db.text("ALTER TABLE users ADD COLUMN verification_code_expiry DATETIME"))
                     if 'reset_code' not in columns:
                         conn.execute(db.text("ALTER TABLE users ADD COLUMN reset_code VARCHAR(32)"))
                     if 'reset_code_expiry' not in columns:

@@ -13,3 +13,5 @@ services:
         generateValue: true
       - key: JWT_SECRET_KEY
         generateValue: true
+      - key: SENTRY_DSN
+        value: ""   # Optional: set your Sentry DSN here for error monitoring

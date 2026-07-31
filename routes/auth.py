@@ -216,10 +216,19 @@ def verify_email(current_user):
         return jsonify({'success': True, 'message': 'Email is already verified.'}), 200
 
     if current_user.verification_code == code:
+        # Check if the verification code has expired
+        if current_user.verification_code_expiry and \
+                datetime.now(timezone.utc) > current_user.verification_code_expiry.replace(tzinfo=timezone.utc):
+            current_user.verification_code = None
+            current_user.verification_code_expiry = None
+            db.session.commit()
+            return jsonify({'success': False, 'message': 'Verification code has expired. Please request a new one.'}), 400
+
         current_user.email_verified = True
         current_user.verification_code = None
+        current_user.verification_code_expiry = None
         db.session.commit()
-        
+
         # Send Welcome Email upon successful verification
         welcome_body = f"""
         <h2>Welcome to VoxAI Studio!</h2>
@@ -229,7 +238,7 @@ def verify_email(current_user):
         <p>Regards,<br>VoxAI Studio Team</p>
         """
         send_email(current_user.email, "Welcome to VoxAI Studio! 🎙️✨", welcome_body)
-        
+
         return jsonify({'success': True, 'message': 'Email verified successfully!'}), 200
 
     return jsonify({'success': False, 'message': 'Invalid verification code.'}), 400
@@ -243,6 +252,7 @@ def resend_verification(current_user):
 
     v_code = str(random.randint(100000, 999999))
     current_user.verification_code = v_code
+    current_user.verification_code_expiry = datetime.now(timezone.utc) + timedelta(hours=24)
     db.session.commit()
 
     email_body = f"""
