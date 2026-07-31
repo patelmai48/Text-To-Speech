@@ -111,6 +111,15 @@ def change_password(current_user):
 @verification_required
 def delete_account(current_user):
     """Permanently delete user account and associated records."""
+    data = request.get_json() or {}
+    current_password = data.get('current_password', '')
+
+    if not current_password:
+        return jsonify({'success': False, 'message': 'Current password is required to delete your account.'}), 400
+
+    if not current_user.check_password(current_password):
+        return jsonify({'success': False, 'message': 'Incorrect password. Account not deleted.'}), 401
+
     db.session.delete(current_user)
     db.session.commit()
 

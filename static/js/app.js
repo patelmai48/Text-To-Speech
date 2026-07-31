@@ -582,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
           historyTableBody.innerHTML = res.history.map(item => `
             <tr>
               <td><span class="badge">#${item.id}</span></td>
-              <td class="history-text-cell" title="${item.text}">${item.text}</td>
+              <td class="history-text-cell" title="${escapeHTML(item.text)}">${escapeHTML(item.text)}</td>
               <td><span class="badge">${item.voice}</span></td>
               <td>${item.character_count} chars</td>
               <td>${new Date(item.created_at).toLocaleDateString()}</td>
@@ -656,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 
                 <div class="history-card-body">
-                  <p class="history-card-text" title="${item.text}">${item.text}</p>
+                  <p class="history-card-text" title="${escapeHTML(item.text)}">${escapeHTML(item.text)}</p>
                   <div class="history-card-metadata">
                     <div class="meta-row">
                       <span class="meta-label">Language</span>
@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           dashboardHistoryBody.innerHTML = res.history.slice(0, 5).map(item => `
             <tr>
-              <td class="history-text-cell" title="${item.text}">${item.text}</td>
+              <td class="history-text-cell" title="${escapeHTML(item.text)}">${escapeHTML(item.text)}</td>
               <td><span class="badge">${item.voice}</span></td>
               <td>${item.character_count}</td>
               <td>

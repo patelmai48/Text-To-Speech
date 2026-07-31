@@ -327,24 +327,7 @@ def reset_password():
 
 
 
-@auth_bp.route('/auth/check-account', methods=['POST'])
-def check_account():
-    """Check account status and authentication type for a given email address."""
-    data = request.get_json() or {}
-    email = data.get('email', '').strip().lower()
-    if not email:
-        return jsonify({'success': False, 'message': 'Email address is required.'}), 400
 
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        return jsonify({'success': True, 'exists': False, 'account_type': 'new'}), 200
-
-    return jsonify({
-        'success': True,
-        'exists': True,
-        'username': user.username,
-        'account_type': 'password'
-    }), 200
 
 @auth_bp.route('/auth/google', methods=['POST'])
 def google_auth():
@@ -357,20 +340,25 @@ def google_auth():
     email = None
     username = None
 
-    # Handle simulation mode for testing
+    # Handle simulation mode for testing/development
     is_simulated = (credential == "simulated_google_token")
     if is_simulated:
+        if not current_app.config.get('DEBUG', False):
+            return jsonify({'success': False, 'message': 'Google Sign-In not configured'}), 501
         email = data.get('email', 'google-test@example.com').lower()
         username = data.get('username', email.split('@')[0])
     else:
+        client_id = current_app.config.get('GOOGLE_CLIENT_ID')
+        if not client_id:
+            return jsonify({'success': False, 'message': 'Google Sign-In not configured'}), 501
+
         try:
             resp = requests.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={credential}", timeout=5)
             if resp.status_code != 200:
                 return jsonify({'success': False, 'message': 'Invalid Google ID token.'}), 401
             
             payload = resp.json()
-            client_id = current_app.config.get('GOOGLE_CLIENT_ID')
-            if client_id and payload.get('aud') != client_id:
+            if payload.get('aud') != client_id:
                 return jsonify({'success': False, 'message': 'Google token audience mismatch.'}), 401
 
             email = payload.get('email', '').lower()

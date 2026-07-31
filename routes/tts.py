@@ -245,34 +245,42 @@ def delete_all_history(current_user):
 @verification_required
 def export_csv(current_user):
     """Export history as downloadable CSV file."""
-    items = History.query.filter_by(user_id=current_user.id).order_by(History.created_at.desc()).all()
-    csv_data = CSVReportGenerator.generate(items)
+    try:
+        items = History.query.filter_by(user_id=current_user.id).order_by(History.created_at.desc()).all()
+        csv_data = CSVReportGenerator.generate(items)
 
-    mem = io.BytesIO()
-    mem.write(csv_data.encode('utf-8'))
-    mem.seek(0)
+        mem = io.BytesIO()
+        mem.write(csv_data.encode('utf-8'))
+        mem.seek(0)
 
-    return send_file(
-        mem,
-        mimetype='text/csv',
-        as_attachment=True,
-        download_name=f'tts_history_{current_user.username}.csv'
-    )
+        return send_file(
+            mem,
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name=f'tts_history_{current_user.username}.csv'
+        )
+    except Exception as e:
+        current_app.logger.error(f"CSV export failed for user {current_user.id}: {e}")
+        return jsonify({'success': False, 'message': 'Failed to generate CSV export.'}), 500
 
 @tts_bp.route('/history/export/pdf', methods=['GET'])
 @token_required
 @verification_required
 def export_pdf(current_user):
     """Export history as downloadable PDF report."""
-    items = History.query.filter_by(user_id=current_user.id).order_by(History.created_at.desc()).all()
-    pdf_buffer = PDFReportGenerator.generate(items, username=current_user.username)
+    try:
+        items = History.query.filter_by(user_id=current_user.id).order_by(History.created_at.desc()).all()
+        pdf_buffer = PDFReportGenerator.generate(items, username=current_user.username)
 
-    return send_file(
-        pdf_buffer,
-        mimetype='application/pdf',
-        as_attachment=True,
-        download_name=f'tts_history_{current_user.username}.pdf'
-    )
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f'tts_history_{current_user.username}.pdf'
+        )
+    except Exception as e:
+        current_app.logger.error(f"PDF export failed for user {current_user.id}: {e}")
+        return jsonify({'success': False, 'message': 'Failed to generate PDF export.'}), 500
 
 @tts_bp.route('/favorites', methods=['GET'])
 @token_required

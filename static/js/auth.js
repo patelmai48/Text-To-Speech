@@ -373,7 +373,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const simCustomSubmitBtn = document.getElementById('sim-custom-submit-btn');
 
   if (googleBtn && googleSimModal) {
-    googleBtn.addEventListener('click', () => {
+    googleBtn.addEventListener('click', async () => {
+      // Test if server supports simulated mode or Google Auth
+      const testRes = await API.post('/auth/google', { credential: 'simulated_google_token' });
+      if (testRes.status === 501 || (testRes.message && testRes.message.includes('not configured'))) {
+        showToast('Google Sign-In not configured', 'error');
+        return;
+      }
       renderGoogleModalView();
       googleSimModal.style.display = 'flex';
       googleSimModal.classList.add('open');
@@ -420,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/';
       }, 800);
     } else {
-      showToast(result.message || 'Google Sign-In failed.', 'error');
+      showToast(result.message || 'Google Sign-In not configured', 'error');
     }
   }
 });
