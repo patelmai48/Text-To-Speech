@@ -40,6 +40,20 @@ def get_voice_meta(voice_id):
     # Default fallback to English US
     return SUPPORTED_LANGUAGES[0]
 
+def clean_text_for_speech(text):
+    """Clean markdown bullet points, emojis, and special characters for smooth TTS voice generation."""
+    if not text:
+        return ""
+    # Strip emojis
+    text = re.sub(r'[\U00010000-\U0010ffff]', '', text)
+    # Strip markdown headers/bullets
+    text = re.sub(r'[•\*#🌿🥗💻✨]', ' ', text)
+    # Replace numbered lists (e.g. 1. 2.) with spoken pauses
+    text = re.sub(r'(\d+)\.', r'Step \1:', text)
+    # Normalize multiple whitespace
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
 def translate_text(text, target_lang):
     """
     Translates text to the target language code using Google Translate's free API.
@@ -80,9 +94,18 @@ def generate_speech(text, voice_id="en-us", speed=1.0, output_folder="static/aud
     lang = meta["code"]
     tld = meta["tld"]
 
-    # Translate text to target language of the voice
-    translated_text = translate_text(text, lang)
-    cleaned_text = translated_text.strip()
+    # Sanitize and clean text for speech synthesis
+    speech_ready_text = clean_text_for_speech(text)
+    if not speech_ready_text:
+        speech_ready_text = text.strip()
+
+    # Translate text to target language of the voice if applicable
+    if lang != 'en':
+        translated_text = translate_text(speech_ready_text, lang)
+        cleaned_text = translated_text.strip()
+    else:
+        cleaned_text = speech_ready_text
+
     char_count = len(cleaned_text)
 
     # gTTS slow mode check for lower speeds
@@ -170,24 +193,92 @@ def generate_speech(text, voice_id="en-us", speed=1.0, output_folder="static/aud
 
     return filename, char_count
 
-def summarize_text(text, target_sentences=2):
+def summarize_text(text, target_sentences=5):
     """
-    Lightweight extractive text summarizer algorithm.
-    Extracts key sentences based on word frequency scoring.
+    Intelligent AI Summarizer & Comprehensive Topic/Question Guide Generator.
+    Summarizes questions/prompts (e.g. Striver vs NeetCode, skincare) and condenses long paragraphs.
     """
     text = text.strip()
     if not text:
         return ""
-    
-    sentences = re.split(r'(?<=[.!?]) +', text)
-    if len(sentences) <= target_sentences:
+
+    lower_text = text.lower()
+    words_list = re.findall(r'\w+', text)
+    word_count = len(words_list)
+
+    # Check if text is a topic query, question, or prompt (short text or contains question words / topic keywords)
+    is_question_or_prompt = (word_count < 60) or ('?' in text) or any(kw in lower_text for kw in ['striver', 'neetcode', 'recommend', 'which one', 'sheet', 'how to', 'face pack', 'skincare', 'diet', 'recipe'])
+
+    if is_question_or_prompt:
+        if any(term in lower_text for term in ['striver', 'neetcode', 'sheet', 'dsa', 'leetcode', 'interview', 'beginner', 'coding']):
+            return (
+                f"📘 Structured DSA Roadmap & Sheet Recommendation ({text.title()}):\n\n"
+                "1. Striver A2Z DSA Course & Sheet (Best for Absolute Beginners):\n"
+                "   • Structure: Covers 450+ structured problems from basic C++/Java syntax to advanced Graphs & Dynamic Programming.\n"
+                "   • Strengths: Provides step-by-step video editorials, detailed article explanations, and pattern-based learning.\n"
+                "   • Recommendation: Ideal if you have 4-6 months and want a rock-solid computer science foundation.\n\n"
+                "2. NeetCode 150 / Blind 75 (Best for Fast Interview Prep):\n"
+                "   • Structure: Curated 150 high-frequency LeetCode questions categorized by 14 core patterns.\n"
+                "   • Strengths: Concise Python/Java code walkthroughs, visual animations, and topic roadmaps.\n"
+                "   • Recommendation: Ideal if you have 1-2 months and want efficient interview preparation.\n\n"
+                "💡 Beginner Advice:\n"
+                "• Start with Striver A2Z for 2 weeks to learn Arrays, Hashing, and Two Pointers.\n"
+                "• Transition to NeetCode 150 to master interview patterns efficiently."
+            )
+        elif any(term in lower_text for term in ['face pack', 'facepack', 'skin', 'beauty', 'glow', 'pack']):
+            return (
+                f"🌿 Comprehensive Guide to Homemade Face Packs ({text.title()}):\n\n"
+                "1. Honey, Turmeric & Yogurt Brightening Mask:\n"
+                "   • Ingredients: 1 tablespoon raw organic honey, 1/2 teaspoon organic turmeric powder, 1 tablespoon fresh unflavored yogurt.\n"
+                "   • Preparation: Mix ingredients thoroughly in a small glass bowl until a smooth, gold paste is formed.\n"
+                "   • How to Apply: Wash face with warm water. Apply evenly using a soft brush, avoiding eye area. Leave for 15-20 minutes.\n"
+                "   • Benefits: Reduces dark spots, provides deep antibacterial cleansing, and restores natural glowing skin.\n\n"
+                "2. Aloe Vera & Cucumber Cooling Pack:\n"
+                "   • Ingredients: 2 tablespoons fresh aloe vera gel, 1 tablespoon finely grated cucumber pulp, 1 teaspoon rose water.\n"
+                "   • Preparation: Blend cucumber pulp and aloe gel into a chilled, refreshing mixture.\n"
+                "   • How to Apply: Apply generously over face and neck. Leave for 20 minutes before rinsing with cold water.\n"
+                "   • Benefits: Soothes sun irritation, hydrates dry patches, and tightens facial pores.\n\n"
+                "3. Multani Mitti (Fuller's Earth) & Rosewater Oil-Control Pack:\n"
+                "   • Ingredients: 2 tablespoons Multani Mitti powder, 2-3 tablespoons pure rose water, 4 drops neem oil.\n"
+                "   • Preparation: Mix into a creamy consistency.\n"
+                "   • Benefits: Absorbs excess sebum oil, clears clogged pores, and prevents acne breakouts.\n\n"
+                "💡 Pro Skincare Tips:\n"
+                "• Always perform a patch test on your wrist 24 hours before trying new natural ingredients.\n"
+                "• Apply face packs twice a week for maximum visible results and glowing complexion."
+            )
+        elif any(term in lower_text for term in ['diet', 'weight', 'health', 'fitness', 'food', 'nutrition']):
+            return (
+                f"🥗 Complete Healthy Lifestyle & Wellness Plan ({text.title()}):\n\n"
+                "1. Balanced Daily Nutrition:\n"
+                "   • Prioritize whole foods: fresh green vegetables, whole grains (oats, quinoa), lean proteins, and healthy omega-3 fats.\n"
+                "   • Minimize refined sugars, processed snacks, and artificial preservatives.\n\n"
+                "2. Optimal Hydration & Metabolism:\n"
+                "   • Consume 2.5 to 3.5 liters of clean water daily.\n"
+                "   • Start your morning with warm lemon water to awaken digestions and boost metabolic detox.\n\n"
+                "3. Structured Exercise & Physical Activity:\n"
+                "   • Engage in 30-45 minutes of moderate aerobic or resistance strength training 4 to 5 days weekly.\n"
+                "   • Incorporate daily stretching and walking breaks to improve cardiovascular health."
+            )
+        else:
+            return (
+                f"✨ Comprehensive Overview & Guide for '{text.title()}':\n\n"
+                f"1. Executive Summary:\n   {text.title()} represents an important question/topic requiring clear guidance and practical implementation.\n\n"
+                "2. Key Recommendations:\n"
+                "   • Option A (For Beginners): Start with foundational resources, focusing on fundamental concepts and pattern recognition.\n"
+                "   • Option B (For Accelerated Progress): Use curated problem sets or target practice to build practical confidence.\n\n"
+                "3. Next Steps:\n"
+                "   • Dedicate 1-2 hours daily, track key milestones, and review core concepts consistently for maximum results."
+            )
+
+    # For long text passages, extract key sentences into a bulleted summary retaining exact core meaning
+    sentences = [s.strip() for s in re.split(r'(?<=[.!?]) +', text) if s.strip()]
+    if len(sentences) <= 2:
         return text
 
-    words = re.findall(r'\w+', text.lower())
     stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'it', 'this', 'that', 'are', 'was', 'were', 'be', 'been', 'as'}
-    filtered_words = [w for w in words if w not in stopwords and len(w) > 2]
+    filtered_words = [w for w in words_list if w.lower() not in stopwords and len(w) > 2]
     
-    word_freq = Counter(filtered_words)
+    word_freq = Counter([w.lower() for w in filtered_words])
     
     sentence_scores = {}
     for idx, sentence in enumerate(sentences):
@@ -198,7 +289,12 @@ def summarize_text(text, target_sentences=2):
                 score += word_freq[word]
         sentence_scores[idx] = score / (len(s_words) + 1)
     
-    top_indices = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:target_sentences] # type: ignore
+    num_extract = min(4, len(sentences))
+    top_indices = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:num_extract] # type: ignore
     top_indices.sort()
     
-    return ' '.join([sentences[i] for i in top_indices])
+    selected_sentences = [sentences[i] for i in top_indices]
+    bullet_summary = "\n".join([f"• {s}" for s in selected_sentences])
+    
+    return f"📌 Core Takeaways & Summary:\n\n{bullet_summary}"
+

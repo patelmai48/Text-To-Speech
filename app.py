@@ -97,7 +97,10 @@ def create_app(config_name=None):
         except Exception as e:
             app.logger.warning(f"Database schema auto-upgrade failed: {e}")
 
-        db.create_all()
+        try:
+            db.create_all()
+        except Exception as e:
+            app.logger.info(f"Database table initialization note: {e}")
 
     return app
 

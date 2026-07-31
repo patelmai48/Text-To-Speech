@@ -22,6 +22,8 @@ database.db
 static/audio/*.mp3
 static/audio/*.wav
 
-# IDEs
+# Logs
+*.log
+app.log
 .vscode/
 .idea/

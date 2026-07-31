@@ -51,12 +51,22 @@
 
         <div>
           <label class="control-label" for="password">Password</label>
-          <input type="password" id="password" class="input-custom" placeholder="••••••••" required minlength="6">
+          <div class="password-input-wrapper">
+            <input type="password" id="password" class="input-custom" placeholder="••••••••" required minlength="6">
+            <button type="button" class="password-toggle-btn" tabindex="-1">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
         </div>
 
         <div>
           <label class="control-label" for="confirm_password">Confirm Password</label>
-          <input type="password" id="confirm_password" class="input-custom" placeholder="••••••••" required minlength="6">
+          <div class="password-input-wrapper">
+            <input type="password" id="confirm_password" class="input-custom" placeholder="••••••••" required minlength="6">
+            <button type="button" class="password-toggle-btn" tabindex="-1">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
         </div>
 
         <button type="submit" class="btn btn-primary btn-full" style="margin-top: 10px;">
@@ -95,30 +105,50 @@
     </footer>
   </div>
 
-  <!-- Simulated Google Account Selector Modal -->
+  <!-- Simulated Google Account Selector Modal (Dynamic Google OAuth Look) -->
   <div class="modal-overlay" id="google-sim-modal" style="display: none;">
-    <div class="glass-card modal-card" style="max-width: 400px; text-align: left;">
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
-        <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+    <div class="google-oauth-modal-card">
+      <div class="google-oauth-top-bar">
+        <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
           <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
           <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
           <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
         </svg>
-        <span style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">Sign in with Google</span>
+        <span>Sign in with Google</span>
+        <button type="button" class="google-modal-close-btn" id="close-google-sim-btn"><i class="bi bi-x-lg"></i></button>
       </div>
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">Enter your Gmail address to continue to <strong>VoxAI Studio</strong></p>
-      
-      <div id="sim-custom-input-panel" style="margin-bottom: 20px;">
-        <label class="control-label" for="sim-custom-email">Email Address</label>
-        <div style="display: flex; gap: 8px;">
-          <input type="email" id="sim-custom-email" class="input-custom" placeholder="name@example.com" style="padding: 8px 12px; font-size: 0.9rem;" required>
-          <button type="button" class="btn btn-primary" id="sim-custom-submit-btn" style="padding: 8px 16px; font-size: 0.9rem;">Next</button>
+
+      <div class="google-oauth-body">
+        <div class="google-oauth-left">
+          <div class="google-app-logo">
+            <i class="bi bi-soundwave"></i>
+          </div>
+          <h2 class="google-oauth-title" id="google-oauth-title-text">Sign in</h2>
+          <p class="google-oauth-subtitle">to continue to <strong style="color: var(--accent-secondary);">VoxAI Studio</strong></p>
+        </div>
+
+        <div class="google-oauth-right">
+          <!-- Dynamic Saved Accounts List -->
+          <div id="google-saved-accounts-container" class="google-accounts-list">
+            <!-- Dynamically populated from browser memory -->
+          </div>
+
+          <!-- Email Input Panel -->
+          <div id="sim-custom-input-panel">
+            <label class="control-label" for="sim-custom-email" style="font-size: 0.85rem; font-weight: 500;">Email address</label>
+            <input type="email" id="sim-custom-email" class="input-custom" placeholder="name@gmail.com" style="padding: 12px 14px; font-size: 0.95rem; margin-bottom: 14px;" required>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+              <a href="#" id="sim-back-to-accounts-link" style="display: none; font-size: 0.85rem; color: #60a5fa; text-decoration: none; font-weight: 500;">← Back to accounts</a>
+              <button type="button" class="btn btn-primary" id="sim-custom-submit-btn" style="padding: 10px 24px; font-size: 0.9rem; margin-left: auto;">Continue</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div style="display: flex; justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary btn-sm" id="close-google-sim-btn">Cancel</button>
+      <div class="google-oauth-footer">
+        Before using this app, you can review VoxAI Studio's <a href="/privacy" target="_blank">Privacy Policy</a> and <a href="/terms" target="_blank">Terms of Service</a>.
       </div>
     </div>
   </div>

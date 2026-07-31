@@ -22,6 +22,7 @@ class User(db.Model):
     # Relationships
     histories = db.relationship('History', backref='user', lazy=True, cascade="all, delete-orphan")
     favorites = db.relationship('Favorite', backref='user', lazy=True, cascade="all, delete-orphan")
+    summaries = db.relationship('Summary', backref='user', lazy=True, cascade="all, delete-orphan")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -101,3 +102,26 @@ class Favorite(db.Model):
             'item_value': self.item_value,
             'created_at': self.created_at.replace(tzinfo=timezone.utc).isoformat() if self.created_at else None
         }
+
+class Summary(db.Model):
+    __tablename__ = 'summaries'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    original_topic = db.Column(db.Text, nullable=False)
+    summary_content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def to_dict(self):
+        """Return dict representation of Summary item."""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'original_topic': self.original_topic,
+            'summary_content': self.summary_content,
+            'created_at': self.created_at.replace(tzinfo=timezone.utc).isoformat() if self.created_at else None
+        }
+

@@ -75,12 +75,15 @@ document.addEventListener('DOMContentLoaded', () => {
     setupShortcuts();
     setupEditorAutoSave();
     setupAudioPlayer();
+    setupQuickConvert();
+    setupDeleteAccountModal();
     setupVerificationHandlers();
 
     await loadUserData();
     await loadVoices();
     await loadHistory();
     await loadFavorites();
+    await loadSummaries();
 
     // Hide player initially
     if (playerCard) playerCard.style.display = 'none';
@@ -136,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'studio': 'TTS Studio',
             'history': 'Conversion History',
             'favorites': 'Favorite Voices',
+            'summaries': 'Saved Summaries',
             'profile': 'Account Profile'
           };
           pageTitle.textContent = titles[targetView] || 'TTS Application';
@@ -272,12 +276,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!checkVerificationState()) return;
         const text = textEditor.value.trim();
         if (!text) {
-          showToast('Please enter text to summarize.', 'warning');
+          showToast('Please enter text or a topic to summarize.', 'warning');
           return;
         }
 
         summarizeBtn.disabled = true;
-        summarizeBtn.innerHTML = '<div class="spinner"></div> Summarizing...';
+        summarizeBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px; border-width: 2px; border-top-color: #fff; margin-right: 4px;"></div> Summarizing...';
 
         const res = await API.post('/tts/summarize', { text });
 
@@ -287,7 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (res.success && res.summary) {
           textEditor.value = res.summary;
           updateCharCount();
-          showToast('Text summarized successfully!', 'success');
+          showToast('Summary & ideas generated and saved to Summaries tab!', 'success');
+          await loadSummaries();
         } else {
           showToast(res.message || 'Summarization failed.', 'error');
         }
@@ -317,39 +322,85 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateCharCount() {
     if (!textEditor || !charCounter) return;
     const len = textEditor.value.length;
-    const max = 3000;
-    charCounter.textContent = `${len} / ${max}`;
-
-    if (len > max) {
-      charCounter.className = 'char-counter limit';
-    } else if (len > 2500) {
-      charCounter.className = 'char-counter warning';
-    } else {
-      charCounter.className = 'char-counter';
-    }
+    charCounter.textContent = `${len.toLocaleString()} characters`;
+    charCounter.className = 'char-counter';
   }
 
-  // --- Speech Conversion API Handler ---
-  async function handleSpeechConversion() {
+  // --- Speech Conversion API Handler with Progress Bar & Estimated Time ---
+  async function handleSpeechConversion(customText = null) {
     if (!checkVerificationState()) return;
-    const text = textEditor.value.trim();
+    let text = '';
+    if (typeof customText === 'string' && customText.trim()) {
+      text = customText.trim();
+    } else if (textEditor && textEditor.value.trim()) {
+      text = textEditor.value.trim();
+    }
+
     if (!text) {
-      showToast('Please enter text to synthesize.', 'warning');
+      showToast('Please enter text into the TTS Studio editor to synthesize.', 'warning');
       return;
     }
 
-    const voice = voiceSelect.value;
-    const speed = parseFloat(speedSlider.value);
-    const pitch = parseFloat(pitchSlider.value);
-    const volume = parseFloat(volumeSlider.value);
+    const voice = voiceSelect ? voiceSelect.value : 'en-us';
+    const speed = speedSlider ? parseFloat(speedSlider.value) : 1.0;
+    const pitch = pitchSlider ? parseFloat(pitchSlider.value) : 1.0;
+    const volume = volumeSlider ? parseFloat(volumeSlider.value) : 1.0;
 
-    convertBtn.disabled = true;
-    convertBtn.innerHTML = `<div class="spinner"></div> Synthesizing Audio...`;
+    if (convertBtn) {
+      convertBtn.disabled = true;
+      convertBtn.innerHTML = `<div class="spinner"></div> Synthesizing Audio...`;
+    }
+
+    // Show conversion progress modal
+    const progressModal = document.getElementById('conversion-progress-modal');
+    const progressFill = document.getElementById('conversion-progress-fill');
+    const progressPercent = document.getElementById('progress-percent-text');
+    const progressTime = document.getElementById('progress-time-text');
+    const progressStatus = document.getElementById('progress-status-text');
+
+    let progressInterval = null;
+    let currentPercent = 0;
+    const estTotalSeconds = Math.max(2, Math.ceil(text.length / 70));
+
+    if (progressModal && progressFill) {
+      progressFill.style.width = '0%';
+      if (progressPercent) progressPercent.textContent = '0%';
+      if (progressTime) progressTime.textContent = `Estimated time: ~${estTotalSeconds}s`;
+      if (progressStatus) progressStatus.textContent = 'Processing text with neural AI voice engine...';
+      progressModal.style.display = 'flex';
+
+      const updateStepMs = 100;
+      const totalSteps = (estTotalSeconds * 1000) / updateStepMs;
+      const stepPercent = 90 / totalSteps;
+
+      progressInterval = setInterval(() => {
+        if (currentPercent < 90) {
+          currentPercent = Math.min(90, currentPercent + stepPercent);
+          progressFill.style.width = `${Math.round(currentPercent)}%`;
+          if (progressPercent) progressPercent.textContent = `${Math.round(currentPercent)}%`;
+          const remainingSecs = Math.max(1, Math.ceil(estTotalSeconds * (1 - currentPercent / 100)));
+          if (progressTime) progressTime.textContent = `Estimated remaining: ~${remainingSecs}s`;
+        }
+      }, updateStepMs);
+    }
 
     const res = await API.post('/tts', { text, voice, speed, pitch, volume });
 
-    convertBtn.disabled = false;
-    convertBtn.innerHTML = `<i class="bi bi-soundwave"></i> Convert to Speech`;
+    if (progressInterval) clearInterval(progressInterval);
+
+    if (progressModal && progressFill) {
+      progressFill.style.width = '100%';
+      if (progressPercent) progressPercent.textContent = '100%';
+      if (progressTime) progressTime.textContent = 'Completed!';
+      setTimeout(() => {
+        progressModal.style.display = 'none';
+      }, 400);
+    }
+
+    if (convertBtn) {
+      convertBtn.disabled = false;
+      convertBtn.innerHTML = `<i class="bi bi-soundwave"></i> Convert to Speech`;
+    }
 
     if (res.success && res.history) {
       showToast('Audio synthesized successfully!', 'success');
@@ -511,8 +562,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (res.history.length === 0) {
           historyTableBody.innerHTML = `
             <tr>
-              <td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">
-                No conversion history found.
+              <td colspan="6" style="padding:0;">
+                <div class="empty-state-card">
+                  <div class="empty-state-icon">
+                    <i class="bi bi-mic"></i>
+                  </div>
+                  <h3 style="font-size: 1.25rem; margin-bottom: 8px;">No Conversions Yet</h3>
+                  <p style="color: var(--text-secondary); max-width: 400px; margin-bottom: 20px; font-size: 0.9rem;">
+                    You haven't converted any text to speech yet. Start synthesizing speech now using high-quality AI voices.
+                  </p>
+                  <button class="btn btn-primary btn-sm" onclick="document.querySelector('.nav-item[data-view=\\'studio\\']').click()">
+                    <i class="bi bi-soundwave"></i> Generate your first speech
+                  </button>
+                </div>
               </td>
             </tr>
           `;
@@ -525,14 +587,20 @@ document.addEventListener('DOMContentLoaded', () => {
               <td>${item.character_count} chars</td>
               <td>${new Date(item.created_at).toLocaleDateString()}</td>
               <td>
-                <div style="display:flex; gap:6px;">
-                  <button class="btn btn-primary btn-sm play-history-btn" data-url="${item.audio_url}">
+                <div style="display:flex; gap:6px; flex-wrap: wrap;">
+                  <button class="btn btn-primary btn-sm play-history-btn" data-url="${item.audio_url}" title="Play Audio">
                     <i class="bi bi-play-fill"></i> Play
                   </button>
-                  <button class="btn btn-secondary btn-sm download-history-btn" data-url="${item.audio_url}" data-filename="speech_${item.id}.mp3" title="Download">
+                  <button class="btn btn-secondary btn-sm download-history-btn" data-url="${item.audio_url}" data-filename="speech_${item.id}.mp3" title="Download MP3">
                     <i class="bi bi-download"></i>
                   </button>
-                  <button class="btn btn-danger btn-sm delete-history-btn" data-id="${item.id}">
+                  <button class="btn btn-secondary btn-sm duplicate-history-btn" data-text="${encodeURIComponent(item.text)}" data-voice="${item.voice}" data-speed="${item.speed}" data-pitch="${item.pitch}" data-volume="${item.volume}" title="Duplicate / Copy Settings">
+                    <i class="bi bi-copy"></i>
+                  </button>
+                  <button class="btn btn-secondary btn-sm edit-history-btn" data-text="${encodeURIComponent(item.text)}" data-voice="${item.voice}" data-speed="${item.speed}" data-pitch="${item.pitch}" data-volume="${item.volume}" title="Edit in Studio">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                  <button class="btn btn-danger btn-sm delete-history-btn" data-id="${item.id}" title="Delete Record">
                     <i class="bi bi-trash-fill"></i>
                   </button>
                 </div>
@@ -547,8 +615,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (historyCardsContainer) {
         if (res.history.length === 0) {
           historyCardsContainer.innerHTML = `
-            <div class="glass-card" style="text-align:center; padding:30px; color:var(--text-muted); margin-bottom:0;">
-              No conversion history found.
+            <div class="empty-state-card glass-card" style="margin-bottom:0;">
+              <div class="empty-state-icon">
+                <i class="bi bi-mic"></i>
+              </div>
+              <h3 style="font-size: 1.25rem; margin-bottom: 8px;">No Conversions Yet</h3>
+              <p style="color: var(--text-secondary); max-width: 400px; margin-bottom: 20px; font-size: 0.9rem;">
+                You haven't converted any text to speech yet. Start synthesizing speech now using high-quality AI voices.
+              </p>
+              <button class="btn btn-primary btn-sm" onclick="document.querySelector('.nav-item[data-view=\\'studio\\']').click()">
+                <i class="bi bi-soundwave"></i> Generate your first speech
+              </button>
             </div>
           `;
         } else {
@@ -596,12 +673,18 @@ document.addEventListener('DOMContentLoaded', () => {
                   </div>
                 </div>
                 
-                <div class="history-card-actions">
+                <div class="history-card-actions" style="display:flex; gap:6px; flex-wrap:wrap;">
                   <button class="btn btn-primary btn-sm play-history-btn" data-url="${item.audio_url}">
                     <i class="bi bi-play-fill"></i> Play
                   </button>
                   <button class="btn btn-secondary btn-sm download-history-btn" data-url="${item.audio_url}" data-filename="speech_${item.id}.mp3">
                     <i class="bi bi-download"></i> Download
+                  </button>
+                  <button class="btn btn-secondary btn-sm duplicate-history-btn" data-text="${encodeURIComponent(item.text)}" data-voice="${item.voice}" data-speed="${item.speed}" data-pitch="${item.pitch}" data-volume="${item.volume}">
+                    <i class="bi bi-copy"></i> Duplicate
+                  </button>
+                  <button class="btn btn-secondary btn-sm edit-history-btn" data-text="${encodeURIComponent(item.text)}" data-voice="${item.voice}" data-speed="${item.speed}" data-pitch="${item.pitch}" data-volume="${item.volume}">
+                    <i class="bi bi-pencil-square"></i> Edit
                   </button>
                   <button class="btn btn-danger btn-sm delete-history-btn" data-id="${item.id}">
                     <i class="bi bi-trash-fill"></i>
@@ -676,6 +759,38 @@ document.addEventListener('DOMContentLoaded', () => {
           a.download = filename;
           a.click();
           showToast('Downloading audio file...', 'success');
+        });
+      });
+
+      document.querySelectorAll('.duplicate-history-btn, .edit-history-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const text = decodeURIComponent(btn.getAttribute('data-text') || '');
+          const voice = btn.getAttribute('data-voice');
+          const speed = btn.getAttribute('data-speed');
+          const pitch = btn.getAttribute('data-pitch');
+          const volume = btn.getAttribute('data-volume');
+
+          if (textEditor) textEditor.value = text;
+          if (voiceSelect && voice) voiceSelect.value = voice;
+          if (speedSlider && speed) {
+            speedSlider.value = speed;
+            if (speedVal) speedVal.textContent = `${parseFloat(speed).toFixed(1)}x`;
+          }
+          if (pitchSlider && pitch) {
+            pitchSlider.value = pitch;
+            if (pitchVal) pitchVal.textContent = `${parseFloat(pitch).toFixed(1)}x`;
+          }
+          if (volumeSlider && volume) {
+            volumeSlider.value = volume;
+            if (volumeVal) volumeVal.textContent = `${Math.round(parseFloat(volume) * 100)}%`;
+          }
+          updateCharCount();
+
+          const isEdit = btn.classList.contains('edit-history-btn');
+          showToast(isEdit ? 'Loaded conversion into Studio for editing.' : 'Duplicated conversion settings into Studio.', 'success');
+
+          const studioNavItem = document.querySelector('.nav-item[data-view="studio"]');
+          if (studioNavItem) studioNavItem.click();
         });
       });
 
@@ -768,9 +883,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (res.success && favoritesContainer) {
       if (res.favorites.length === 0) {
         favoritesContainer.innerHTML = `
-          <div class="glass-card" style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted); margin-bottom: 0;">
-            <i class="bi bi-star" style="font-size: 2.5rem; color: var(--text-muted); display: block; margin-bottom: 12px;"></i>
-            No favorite voices added yet. Add voices from the TTS Studio!
+          <div class="empty-state-card glass-card" style="grid-column: 1/-1; margin-bottom: 0;">
+            <div class="empty-state-icon" style="background: rgba(245, 158, 11, 0.12); color: var(--accent-amber);">
+              <i class="bi bi-star"></i>
+            </div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 8px;">No Favorite Voices Saved</h3>
+            <p style="color: var(--text-secondary); max-width: 400px; margin-bottom: 20px; font-size: 0.9rem;">
+              Save your favorite neural voice presets for instant access and one-click speech synthesis.
+            </p>
+            <button class="btn btn-primary btn-sm" onclick="document.querySelector('.nav-item[data-view=\\'studio\\']').click()">
+              <i class="bi bi-sliders"></i> Explore & Favorite Voices
+            </button>
           </div>
         `;
         return;
@@ -925,6 +1048,123 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // --- Summaries Manager ---
+  async function loadSummaries(searchQuery = '') {
+    const summariesContainer = document.getElementById('summaries-container');
+    const summariesSearchInput = document.getElementById('summaries-search');
+
+    if (!summariesContainer) return;
+
+    const res = await API.get('/summaries');
+    if (!res.success) return;
+
+    let items = res.summaries || [];
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      items = items.filter(s => s.original_topic.toLowerCase().includes(q) || s.summary_content.toLowerCase().includes(q));
+    }
+
+    if (items.length === 0) {
+      summariesContainer.innerHTML = `
+        <div class="empty-state-card glass-card" style="grid-column: 1/-1; margin-bottom: 0;">
+          <div class="empty-state-icon" style="background: rgba(99, 102, 241, 0.12); color: var(--accent-primary);">
+            <i class="bi bi-magic"></i>
+          </div>
+          <h3 style="font-size: 1.25rem; margin-bottom: 8px;">No Saved Summaries Yet</h3>
+          <p style="color: var(--text-secondary); max-width: 420px; margin-bottom: 20px; font-size: 0.9rem;">
+            Click <strong>Summarize</strong> in the TTS Studio to generate structured summaries, ideas, and guides. They will automatically save here.
+          </p>
+          <button class="btn btn-primary btn-sm" onclick="document.querySelector('.nav-item[data-view=\\'studio\\']').click()">
+            <i class="bi bi-pencil-square"></i> Go to TTS Studio
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    summariesContainer.innerHTML = items.map(item => {
+      const dateStr = new Date(item.created_at).toLocaleDateString();
+      const timeStr = new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="summary-card glass-card" style="margin-bottom:0;">
+          <div class="summary-card-header">
+            <div>
+              <div class="summary-topic-title">${escapeHTML(item.original_topic)}</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+                <i class="bi bi-clock"></i> ${dateStr} ${timeStr}
+              </div>
+            </div>
+            <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: var(--accent-primary);"><i class="bi bi-magic"></i> AI Summary</span>
+          </div>
+
+          <div class="summary-card-body">${escapeHTML(item.summary_content)}</div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top: 10px;">
+            <button class="btn btn-primary btn-sm use-summary-btn" data-text="${encodeURIComponent(item.summary_content)}">
+              <i class="bi bi-soundwave"></i> Convert in Studio
+            </button>
+            <button class="btn btn-secondary btn-sm copy-summary-btn" data-text="${encodeURIComponent(item.summary_content)}">
+              <i class="bi bi-copy"></i> Copy
+            </button>
+            <button class="btn btn-danger btn-sm delete-summary-btn" data-id="${item.id}">
+              <i class="bi bi-trash-fill"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Attach event listeners for summary card buttons
+    document.querySelectorAll('.use-summary-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const text = decodeURIComponent(btn.getAttribute('data-text') || '');
+        if (textEditor) {
+          textEditor.value = text;
+          updateCharCount();
+        }
+        const studioNavItem = document.querySelector('.nav-item[data-view="studio"]');
+        if (studioNavItem) studioNavItem.click();
+        showToast('Synthesizing speech from summary...', 'info');
+        await handleSpeechConversion(text);
+      });
+    });
+
+    document.querySelectorAll('.copy-summary-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = decodeURIComponent(btn.getAttribute('data-text') || '');
+        navigator.clipboard.writeText(text);
+        showToast('Summary copied to clipboard!', 'success');
+      });
+    });
+
+    document.querySelectorAll('.delete-summary-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete this saved summary?')) {
+          const res = await API.delete(`/summaries/${id}`);
+          if (res.success) {
+            showToast('Summary deleted.', 'info');
+            await loadSummaries();
+          }
+        }
+      });
+    });
+
+    if (summariesSearchInput && !summariesSearchInput.hasAttribute('data-bound')) {
+      summariesSearchInput.setAttribute('data-bound', 'true');
+      summariesSearchInput.addEventListener('input', (e) => {
+        loadSummaries(e.target.value.trim());
+      });
+    }
+  }
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, 
+      tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+  }
+
   // --- Profile Settings Handlers ---
   if (profileForm) {
     profileForm.addEventListener('submit', async (e) => {
@@ -976,26 +1216,117 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (deleteAccountBtn) {
-    deleteAccountBtn.addEventListener('click', async () => {
-      if (!checkVerificationState()) return;
-      if (confirm('CAUTION: Are you sure you want to permanently delete your account? This action cannot be undone.')) {
-        const originalText = deleteAccountBtn.innerHTML;
-        deleteAccountBtn.disabled = true;
-        deleteAccountBtn.innerHTML = 'Deleting...';
+  // --- Dashboard Quick Convert Handler ---
+  function setupQuickConvert() {
+    const quickTextarea = document.getElementById('dashboard-quick-text');
+    const fileInput = document.getElementById('dashboard-file-upload');
+    const fileNameSpan = document.getElementById('dashboard-file-name');
+    const quickConvertBtn = document.getElementById('dashboard-quick-convert-btn');
+    const openStudioBtn = document.getElementById('dashboard-open-studio-btn');
+
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!file.name.endsWith('.txt')) {
+          showToast('Please select a valid .txt file.', 'warning');
+          return;
+        }
+        if (fileNameSpan) fileNameSpan.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          if (quickTextarea) quickTextarea.value = evt.target.result;
+          showToast('Loaded text file into Quick Convert', 'info');
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    if (quickConvertBtn) {
+      quickConvertBtn.addEventListener('click', async () => {
+        const text = quickTextarea ? quickTextarea.value.trim() : '';
+        if (!text) {
+          showToast('Please enter or upload text to convert.', 'warning');
+          return;
+        }
+        if (textEditor) {
+          textEditor.value = text;
+          updateCharCount();
+        }
+        await handleSpeechConversion(text);
+      });
+    }
+
+    if (openStudioBtn) {
+      openStudioBtn.addEventListener('click', () => {
+        const text = quickTextarea ? quickTextarea.value.trim() : '';
+        if (text && textEditor) {
+          textEditor.value = text;
+          updateCharCount();
+        }
+        const studioItem = document.querySelector('.nav-item[data-view="studio"]');
+        if (studioItem) studioItem.click();
+      });
+    }
+  }
+
+  // --- Delete Account Safety Confirmation Handler ---
+  function setupDeleteAccountModal() {
+    const deleteModal = document.getElementById('delete-confirm-modal');
+    const closeDeleteModalBtn = document.getElementById('close-delete-modal-btn');
+    const deleteInput = document.getElementById('delete-confirm-username');
+    const deleteSubmitBtn = document.getElementById('delete-confirm-submit-btn');
+    const deleteForm = document.getElementById('delete-account-confirm-form');
+
+    if (deleteAccountBtn && deleteModal) {
+      deleteAccountBtn.addEventListener('click', () => {
+        if (!checkVerificationState()) return;
+        if (deleteInput) deleteInput.value = '';
+        if (deleteSubmitBtn) deleteSubmitBtn.disabled = true;
+        deleteModal.style.display = 'flex';
+        deleteModal.classList.add('open');
+      });
+    }
+
+    if (closeDeleteModalBtn && deleteModal) {
+      closeDeleteModalBtn.addEventListener('click', () => {
+        deleteModal.classList.remove('open');
+        setTimeout(() => deleteModal.style.display = 'none', 300);
+      });
+    }
+
+    if (deleteInput && deleteSubmitBtn) {
+      deleteInput.addEventListener('input', () => {
+        const val = deleteInput.value.trim();
+        deleteSubmitBtn.disabled = (val.toUpperCase() !== 'DELETE');
+      });
+    }
+
+    if (deleteForm) {
+      deleteForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const val = deleteInput ? deleteInput.value.trim() : '';
+        if (val.toUpperCase() !== 'DELETE') {
+          showToast('Please type DELETE to confirm account deletion.', 'warning');
+          return;
+        }
+
+        const submitBtn = deleteForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<div class="spinner"></div> Deleting Account...`;
 
         const res = await API.delete('/profile');
         if (res.success) {
           AuthToken.remove();
-          showToast('Account deleted.', 'info');
+          showToast('Account permanently deleted.', 'info');
           setTimeout(() => window.location.href = '/login', 800);
         } else {
-          deleteAccountBtn.disabled = false;
-          deleteAccountBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Permanently Delete';
           showToast(res.message || 'Account deletion failed.', 'error');
         }
-      }
-    });
+      });
+    }
   }
 
   // --- Verification Checks & Playback Sync Helpers ---

@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import csv
 import io
 from flask import Blueprint, request, jsonify, send_file, current_app
-from models import db, History, Favorite
+from models import db, History, Favorite, Summary
 from routes.auth import token_required, verification_required
 from services.speech import generate_speech, summarize_text, SUPPORTED_LANGUAGES, get_voice_meta
 from reportlab.lib.pagesizes import letter
@@ -111,17 +111,52 @@ def create_tts(current_user):
 @token_required
 @verification_required
 def summarize(current_user):
-    """Summarize text content before speech conversion."""
+    """Summarize text content and automatically save to user's Summaries collection."""
     data = request.get_json() or {}
     text = data.get('text', '').strip()
     if not text:
         return jsonify({'success': False, 'message': 'Text content is required for summarization.'}), 400
 
-    summary = summarize_text(text)
+    summary_text = summarize_text(text)
+    
+    # Save to summaries table
+    summary_item = Summary(
+        user_id=current_user.id,
+        original_topic=text[:150],
+        summary_content=summary_text
+    )
+    db.session.add(summary_item)
+    db.session.commit()
+
     return jsonify({
         'success': True,
-        'summary': summary
+        'summary': summary_text,
+        'saved_summary': summary_item.to_dict()
     }), 200
+
+@tts_bp.route('/summaries', methods=['GET'])
+@token_required
+@verification_required
+def get_summaries(current_user):
+    """Retrieve saved summaries for current user."""
+    summaries = Summary.query.filter_by(user_id=current_user.id).order_by(Summary.created_at.desc()).all()
+    return jsonify({
+        'success': True,
+        'summaries': [s.to_dict() for s in summaries]
+    }), 200
+
+@tts_bp.route('/summaries/<int:summary_id>', methods=['DELETE'])
+@token_required
+@verification_required
+def delete_summary(current_user, summary_id):
+    """Delete a single summary item."""
+    item = Summary.query.filter_by(id=summary_id, user_id=current_user.id).first()
+    if not item:
+        return jsonify({'success': False, 'message': 'Summary item not found.'}), 404
+
+    db.session.delete(item)
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Summary deleted successfully.'}), 200
 
 @tts_bp.route('/history', methods=['GET'])
 @token_required

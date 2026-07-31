@@ -19,7 +19,7 @@ class Config:
     
     # Audio uploads configuration
     AUDIO_FOLDER = os.path.join(BASE_DIR, 'static', 'audio')
-    MAX_TEXT_LENGTH = 3000
+    MAX_TEXT_LENGTH = 1000000
 
     # SMTP configuration
     MAIL_SERVER = os.getenv('MAIL_SERVER')

@@ -248,7 +248,96 @@ def resend_verification(current_user):
 
     return jsonify({'success': True, 'message': 'Verification code resent successfully.'}), 200
 
+@auth_bp.route('/auth/forgot-password', methods=['POST'])
+def forgot_password():
+    """Request a password reset code."""
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    if not email:
+        return jsonify({'success': False, 'message': 'Email address is required.'}), 400
 
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        # Avoid user enumeration attacks: return success but do nothing
+        return jsonify({'success': True, 'message': 'If the email exists, a reset code has been sent.'}), 200
+
+    reset_code = str(random.randint(100000, 999999))
+    user.reset_code = reset_code
+    user.reset_code_expiry = datetime.now(timezone.utc) + timedelta(hours=1)
+    db.session.commit()
+
+    email_body = f"""
+    <h2>Reset your password</h2>
+    <p>We received a request to reset your password. Use the following code to reset it:</p>
+    <p>Your password reset code is: <b>{reset_code}</b> (Valid for 1 hour)</p>
+    <p>If you did not request this, you can ignore this email.</p>
+    <p>Regards,<br>VoxAI Studio Team</p>
+    """
+    
+    # Check if SMTP works, if not, return the dev_code
+    smtp_success = send_email(email, "Password Reset Request - VoxAI Studio", email_body)
+    if not smtp_success:
+        return jsonify({
+            'success': True,
+            'message': 'Password reset code generated in development mode.',
+            'dev_code': reset_code
+        }), 200
+
+    return jsonify({'success': True, 'message': 'If the email exists, a reset code has been sent.'}), 200
+
+@auth_bp.route('/auth/reset-password', methods=['POST'])
+def reset_password():
+    """Verify reset code and update password."""
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    code = data.get('code', '').strip()
+    new_password = data.get('new_password', '')
+
+    if not email or not code or not new_password:
+        return jsonify({'success': False, 'message': 'Email, code, and new password are required.'}), 400
+
+    if len(new_password) < 6:
+        return jsonify({'success': False, 'message': 'Password must be at least 6 characters long.'}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user or user.reset_code != code:
+        return jsonify({'success': False, 'message': 'Invalid email or reset code.'}), 400
+
+    # Handle timezone naive/aware comparison cleanly
+    expiry = user.reset_code_expiry
+    if expiry:
+        if expiry.tzinfo is None:
+            expiry = expiry.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) > expiry:
+            return jsonify({'success': False, 'message': 'Reset code has expired.'}), 400
+
+    user.set_password(new_password)
+    user.reset_code = None
+    user.reset_code_expiry = None
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Password reset successful! You can now log in.'}), 200
+
+
+
+@auth_bp.route('/auth/check-account', methods=['POST'])
+def check_account():
+    """Check account status and authentication type for a given email address."""
+    data = request.get_json() or {}
+    email = data.get('email', '').strip().lower()
+    if not email:
+        return jsonify({'success': False, 'message': 'Email address is required.'}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({'success': True, 'exists': False, 'account_type': 'new'}), 200
+
+    return jsonify({
+        'success': True,
+        'exists': True,
+        'username': user.username,
+        'account_type': 'password'
+    }), 200
 
 @auth_bp.route('/auth/google', methods=['POST'])
 def google_auth():
@@ -262,22 +351,10 @@ def google_auth():
     username = None
 
     # Handle simulation mode for testing
-    # Handle simulation mode for testing
     is_simulated = (credential == "simulated_google_token")
     if is_simulated:
         email = data.get('email', 'google-test@example.com').lower()
-        username = data.get('username', 'google-test')
-        
-        # Check if it's one of the preset test accounts
-        preset_emails = ["google-test@example.com", "google-dev@example.com"]
-        if email not in preset_emails:
-            # Block simulated login for existing custom email accounts
-            existing_user = User.query.filter_by(email=email).first()
-            if existing_user:
-                return jsonify({
-                    'success': False,
-                    'message': 'Simulated Google Sign-In is disabled for existing registered accounts. Please log in using your password.'
-                }), 403
+        username = data.get('username', email.split('@')[0])
     else:
         try:
             resp = requests.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={credential}", timeout=5)
@@ -312,7 +389,7 @@ def google_auth():
         db.session.add(user)
         db.session.commit()
         
-        # Send welcome email for Google registrations!
+        # Send welcome email for new Google registrations!
         welcome_body = f"""
         <h2>Welcome to VoxAI Studio! 🎙️✨</h2>
         <p>Hello {username},</p>
@@ -322,6 +399,7 @@ def google_auth():
         """
         send_email(email, "Welcome to VoxAI Studio! 🎙️✨", welcome_body)
     else:
+        user.email_verified = True
         user.last_login = datetime.now(timezone.utc)
         db.session.commit()
 
