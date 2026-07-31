@@ -9,6 +9,7 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 ### 🔐 Authentication & Security
 - **User Registration & Login**: Full account creation with email verification & password recovery support.
 - **JWT Protection**: Secure stateful JWT access tokens and authorization headers (`Bearer <token>`).
+- **Security Headers & CSP**: Standard security headers and Content Security Policy (CSP) powered by **Flask-Talisman**.
 - **API Rate Limiting**: Built-in request rate limiting using **Flask-Limiter** with IP tracking (`get_remote_address`) to protect endpoints against brute-force attacks and abuse.
 - **Password Hashing**: Industry-standard salted hashing powered by `Werkzeug.security`.
 - **Dynamic Google OAuth Account Manager**:
@@ -43,8 +44,11 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 - **Rich Empty States**: Engaging SVG illustrations and primary call-to-action buttons ("Generate your first speech", "Explore Voices", "Generate Summaries") across History, Favorites, and Summaries pages.
 - **Export Options**: Export conversion history to **CSV** or styled **PDF** reports with a single click, powered by a dedicated reporting service (`services/reporting.py`).
 
-### 🐳 Containerization & Deployment
+### 🐳 Containerization, Database Migrations & CI/CD
 - **Docker & Docker Compose**: Multi-stage lightweight production Docker container setup with non-root security context (`voxaiuser`).
+- **Database Migrations & Indexing**: Powered by **Flask-Migrate** (Alembic) with database indexing on key foreign key columns.
+- **Automated Testing Suite**: Full **Pytest** test suite (`tests/`) covering Authentication, Speech Synthesis, PDF/CSV Export, Health checks, and Error handlers.
+- **GitHub Actions CI/CD Pipeline**: Automated workflow (`.github/workflows/ci.yml`) for automated linting, test execution, and code coverage reporting on `push` and `pull_request`.
 - **Gunicorn Production Server**: Configured WSGI server with multi-worker threading (`wsgi.py`).
 - **PostgreSQL Integration**: Environment-switchable database layer supporting both SQLite (local dev) and PostgreSQL (production).
 - **Health Monitoring**: Integrated `/health` endpoint for container health check probes.
@@ -56,11 +60,13 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 | Layer | Technologies |
 | :--- | :--- |
 | **Frontend** | HTML5, CSS3 (Vanilla Glassmorphism, CSS Custom Properties), JavaScript (Vanilla ES6+), Web Audio API, Canvas API |
-| **Backend** | Python 3.14+, Flask 3.1+, Flask-SQLAlchemy, Flask-CORS, Flask-Limiter, PyJWT, gTTS, edge-tts, Gunicorn |
+| **Backend** | Python 3.14+, Flask 3.1+, Flask-SQLAlchemy, Flask-Migrate, Flask-CORS, Flask-Limiter, Flask-Talisman, PyJWT, gTTS, edge-tts, Gunicorn |
 | **Database** | SQLite3 (Development) / PostgreSQL (Production) |
+| **Testing** | Pytest, pytest-cov |
+| **CI/CD** | GitHub Actions (`.github/workflows/ci.yml`) |
 | **Containerization** | Docker, Docker Compose |
 | **Reporting** | ReportLab (PDF Generation), Python `csv` module |
-| **Security** | Werkzeug Security, JWT Tokens, Environment Variables (`python-dotenv`) |
+| **Security** | Werkzeug Security, JWT Tokens, Content Security Policy, Environment Variables (`python-dotenv`) |
 
 ---
 
@@ -70,8 +76,9 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 tts-app/
 ├── app.py                     # Main Flask application initialization & blueprint registration
 ├── config.py                  # Environment & database configuration management
-├── models.py                  # SQLAlchemy models (User, History, Favorite, Summary)
+├── models.py                  # SQLAlchemy models (User, History, Favorite, Summary) with indexing
 ├── wsgi.py                    # Production WSGI application entry point for Gunicorn
+├── pytest.ini                 # Pytest configuration & coverage options
 ├── Dockerfile                 # Multi-stage production Docker container configuration
 ├── docker-compose.yml         # Container orchestration (Web app + PostgreSQL database)
 ├── .dockerignore              # Excluded files from Docker context
@@ -80,6 +87,16 @@ tts-app/
 ├── .env.example               # Environment template file
 ├── database.db                # SQLite database (auto-generated)
 ├── README.md                  # Detailed documentation
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml             # GitHub Actions CI automated build & test pipeline
+│
+├── tests/                     # Pytest automated test suite
+│   ├── conftest.py            # Test app fixtures & authenticated headers
+│   ├── test_auth.py           # Registration, login, password recovery & Google auth tests
+│   ├── test_tts.py            # Voices, speech synthesis, history, summary & export tests
+│   └── test_health.py         # System health check & error handler tests
 │
 ├── services/
 │   ├── __init__.py
@@ -118,6 +135,9 @@ tts-app/
 - `POST /api/register` - Create a new user account
 - `POST /api/login` - Authenticate and return JWT token
 - `POST /api/auth/google` - Authenticate with Google identity / simulation
+- `POST /api/auth/forgot-password` - Request a password reset code
+- `POST /api/auth/reset-password` - Verify code & reset password
+- `POST /api/auth/verify-email` - Verify user email address
 - `GET /api/me` - Get current authenticated user details
 
 ### Text-to-Speech & History
@@ -144,6 +164,17 @@ tts-app/
 - `PUT /api/profile` - Update username and email
 - `PUT /api/profile/password` - Change account password
 - `DELETE /api/profile` - Delete user account
+
+---
+
+## 🧪 Running Automated Tests
+
+Run the complete Pytest suite with code coverage:
+
+```bash
+# Run pytest with terminal coverage summary
+pytest
+```
 
 ---
 

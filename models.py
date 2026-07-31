@@ -50,7 +50,7 @@ class History(db.Model):
     __tablename__ = 'histories'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     text = db.Column(db.Text, nullable=False)
     language = db.Column(db.String(20), nullable=False, default='en')
     voice = db.Column(db.String(50), nullable=False, default='en-us-female')
@@ -85,7 +85,7 @@ class Favorite(db.Model):
     __tablename__ = 'favorites'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     item_type = db.Column(db.String(20), nullable=False)  # 'voice' or 'language'
     item_value = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
@@ -107,7 +107,7 @@ class Summary(db.Model):
     __tablename__ = 'summaries'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     original_topic = db.Column(db.Text, nullable=False)
     summary_content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))

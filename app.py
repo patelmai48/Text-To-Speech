@@ -2,9 +2,15 @@ import os
 from flask import Flask, render_template, jsonify, send_from_directory
 from flask_cors import CORS
 # pyrefly: ignore [missing-import]
+# pyrefly: ignore [missing-import]
 from flask_limiter import Limiter
 # pyrefly: ignore [missing-import]
 from flask_limiter.util import get_remote_address
+# pyrefly: ignore [missing-import]
+from flask_migrate import Migrate
+# pyrefly: ignore [missing-import]
+from flask_talisman import Talisman
+
 from config import config_by_name
 from models import db
 from routes.auth import auth_bp
@@ -24,7 +30,27 @@ def create_app(config_name=None):
 
     # Initialize Extensions
     db.init_app(app)
-    
+    Migrate(app, db)
+
+    # Security Headers & Content Security Policy (Talisman)
+    # Disabled force_https in testing/development environments
+    is_testing = config_name == 'testing' or app.config.get('TESTING', False)
+    csp = {
+        'default-src': ["'self'"],
+        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://accounts.google.com"],
+        'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        'font-src': ["'self'", "https://fonts.gstatic.com"],
+        'img-src': ["'self'", "data:", "https://*"],
+        'connect-src': ["'self'", "https://*"],
+        'media-src': ["'self'", "blob:", "data:"]
+    }
+    Talisman(
+        app,
+        content_security_policy=csp,
+        force_https=not is_testing and not app.debug,
+        session_cookie_secure=not is_testing and not app.debug
+    )
+
     # Configurable CORS origins
     allowed_origins = os.getenv('ALLOWED_ORIGINS', '*').split(',')
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
