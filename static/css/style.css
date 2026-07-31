@@ -2526,6 +2526,18 @@ html, body {
     min-width: 44px;
   }
 
+  /* Preserve natural icon font dimensions */
+  i,
+  .bi,
+  svg,
+  button i,
+  .btn i,
+  .action-btn i,
+  .icon-btn i {
+    min-height: auto !important;
+    min-width: auto !important;
+  }
+
   /* Increase Spacing & Padding for Touch Accuracy */
   .action-btn {
     padding: 10px 14px;
