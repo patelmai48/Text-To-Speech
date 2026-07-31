@@ -1,6 +1,6 @@
 # VoxAI Studio - Full Stack AI Text-to-Speech Web Application 🎙️✨
 
-A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application built with **Python Flask**, **SQLite**, **SQLAlchemy**, **JWT Authentication**, and a high-end **Glassmorphism UI** powered by Vanilla HTML5, CSS3, and JavaScript.
+A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application built with **Python Flask**, **SQLite/PostgreSQL**, **SQLAlchemy**, **JWT Authentication**, **Flask-Limiter**, **Docker**, and a high-end **Glassmorphism UI** powered by Vanilla HTML5, CSS3, and JavaScript.
 
 ---
 
@@ -9,6 +9,7 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 ### 🔐 Authentication & Security
 - **User Registration & Login**: Full account creation with email verification & password recovery support.
 - **JWT Protection**: Secure stateful JWT access tokens and authorization headers (`Bearer <token>`).
+- **API Rate Limiting**: Built-in request rate limiting using **Flask-Limiter** with IP tracking (`get_remote_address`) to protect endpoints against brute-force attacks and abuse.
 - **Password Hashing**: Industry-standard salted hashing powered by `Werkzeug.security`.
 - **Dynamic Google OAuth Account Manager**:
   - Official Google OAuth dark-mode dialog layout.
@@ -40,18 +41,13 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 - **User Analytics**: Tracks Total Conversions, Total Characters Processed, Favorite Voices, and Last Login timestamp.
 - **Conversion History Quick Actions**: Every history item features quick action buttons: **Download MP3**, **Duplicate Script**, and **Edit in Studio**.
 - **Rich Empty States**: Engaging SVG illustrations and primary call-to-action buttons ("Generate your first speech", "Explore Voices", "Generate Summaries") across History, Favorites, and Summaries pages.
-- **Export Options**: Export conversion history to **CSV** or styled **PDF** reports with a single click.
+- **Export Options**: Export conversion history to **CSV** or styled **PDF** reports with a single click, powered by a dedicated reporting service (`services/reporting.py`).
 
-### 🎨 Design & Accessibility
-- **Modern Glassmorphism UI**: Backdrop blurs, ambient animated glowing background orbs, smooth hover/tap micro-animations, and vibrant gradient accents.
-- **Accessibility & Contrast**: High-contrast placeholders (`opacity: 0.9`, WCAG AA compliant) and generous section padding across panels.
-- **Toast Notifications**: Repositioned to top-right (`top: 24px`, `right: 24px`, `z-index: 99999`) so action buttons are never obscured.
-- **Dark & Light Mode Switcher**: Seamless theme toggle with local storage memory.
-- **Keyboard Shortcuts**:
-  - `Ctrl + Enter`: Convert text to speech.
-  - `Space`: Toggle Audio Play / Pause.
-  - `Ctrl + K`: Focus script text editor.
-  - `Esc`: Clear focus / editor.
+### 🐳 Containerization & Deployment
+- **Docker & Docker Compose**: Multi-stage lightweight production Docker container setup with non-root security context (`voxaiuser`).
+- **Gunicorn Production Server**: Configured WSGI server with multi-worker threading (`wsgi.py`).
+- **PostgreSQL Integration**: Environment-switchable database layer supporting both SQLite (local dev) and PostgreSQL (production).
+- **Health Monitoring**: Integrated `/health` endpoint for container health check probes.
 
 ---
 
@@ -60,8 +56,9 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 | Layer | Technologies |
 | :--- | :--- |
 | **Frontend** | HTML5, CSS3 (Vanilla Glassmorphism, CSS Custom Properties), JavaScript (Vanilla ES6+), Web Audio API, Canvas API |
-| **Backend** | Python 3.14+, Flask 3.0+, Flask-SQLAlchemy, Flask-CORS, PyJWT, gTTS, edge-tts |
-| **Database** | SQLite3 |
+| **Backend** | Python 3.14+, Flask 3.1+, Flask-SQLAlchemy, Flask-CORS, Flask-Limiter, PyJWT, gTTS, edge-tts, Gunicorn |
+| **Database** | SQLite3 (Development) / PostgreSQL (Production) |
+| **Containerization** | Docker, Docker Compose |
 | **Reporting** | ReportLab (PDF Generation), Python `csv` module |
 | **Security** | Werkzeug Security, JWT Tokens, Environment Variables (`python-dotenv`) |
 
@@ -74,6 +71,10 @@ tts-app/
 ├── app.py                     # Main Flask application initialization & blueprint registration
 ├── config.py                  # Environment & database configuration management
 ├── models.py                  # SQLAlchemy models (User, History, Favorite, Summary)
+├── wsgi.py                    # Production WSGI application entry point for Gunicorn
+├── Dockerfile                 # Multi-stage production Docker container configuration
+├── docker-compose.yml         # Container orchestration (Web app + PostgreSQL database)
+├── .dockerignore              # Excluded files from Docker context
 ├── requirements.txt           # Python package dependencies
 ├── .env                       # Local environment variables
 ├── .env.example               # Environment template file
@@ -82,7 +83,8 @@ tts-app/
 │
 ├── services/
 │   ├── __init__.py
-│   └── speech.py              # Speech synthesis, text sanitization & dual-mode AI summarizer
+│   ├── speech.py              # Speech synthesis, text sanitization & dual-mode AI summarizer
+│   └── reporting.py           # Dedicated PDF generation & CSV export reporting service
 │
 ├── routes/
 │   ├── __init__.py
@@ -109,6 +111,9 @@ tts-app/
 
 ## 🔌 REST API Endpoints
 
+### System & Health
+- `GET /health` - Service health status check
+
 ### Authentication
 - `POST /api/register` - Create a new user account
 - `POST /api/login` - Authenticate and return JWT token
@@ -117,7 +122,7 @@ tts-app/
 
 ### Text-to-Speech & History
 - `GET /api/voices` - List available voice accents and languages
-- `POST /api/tts` - Synthesize text into speech and log history
+- `POST /api/tts` - Synthesize text into speech and log history (Rate limited)
 - `POST /api/tts/summarize` - Summarize text/topics and auto-save to Summaries
 - `GET /api/history` - Retrieve user conversion history (supports `?search=`)
 - `DELETE /api/history/:id` - Delete single history record & audio file
@@ -144,13 +149,15 @@ tts-app/
 
 ## 🚀 Quick Start Guide
 
-### 1. Clone & Navigate
+### Local Development (Virtual Environment)
+
+#### 1. Clone & Navigate
 ```bash
 git clone https://github.com/patelmai48/Text-To-Speech.git
 cd Text-To-Speech
 ```
 
-### 2. Create & Activate Virtual Environment
+#### 2. Create & Activate Virtual Environment
 ```bash
 python -m venv .venv
 # On Windows:
@@ -159,9 +166,43 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Install Dependencies
+#### 3. Install Dependencies
 ```bash
 pip install -r requirements.txt
+```
+
+#### 4. Launch the Application
+```bash
+python app.py
+```
+Open your browser and navigate to **`http://127.0.0.1:5000`**.
+
+---
+
+### 🐳 Docker & Docker Compose Deployment
+
+To run the application along with a PostgreSQL database in production mode:
+
+```bash
+# Build and start services in detached mode
+docker-compose up --build -d
+```
+Access the application at **`http://localhost:5000`**.
+
+To stop the containers:
+```bash
+docker-compose down
+```
+
+---
+
+## 🚀 Live Demo
+
+https://text-to-speech-efmm.onrender.com
+
+## 📜 License
+Distributed under the MIT License. See `LICENSE` for details.
+ments.txt
 ```
 
 ### 4. Launch the Application

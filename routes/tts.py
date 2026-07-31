@@ -10,10 +10,7 @@ from flask import Blueprint, request, jsonify, send_file, current_app
 from models import db, History, Favorite, Summary
 from routes.auth import token_required, verification_required
 from services.speech import generate_speech, summarize_text, SUPPORTED_LANGUAGES, get_voice_meta
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib import colors
+from services.reporting import CSVReportGenerator, PDFReportGenerator
 
 tts_bp = Blueprint('tts', __name__)
 
@@ -226,24 +223,10 @@ def delete_all_history(current_user):
 def export_csv(current_user):
     """Export history as downloadable CSV file."""
     items = History.query.filter_by(user_id=current_user.id).order_by(History.created_at.desc()).all()
-
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['ID', 'Text', 'Language', 'Voice', 'Speed', 'Character Count', 'Created At'])
-
-    for item in items:
-        writer.writerow([
-            item.id,
-            item.text.replace('\n', ' '),
-            item.language,
-            item.voice,
-            item.speed,
-            item.character_count,
-            item.created_at.strftime('%Y-%m-%d %H:%M:%S') if item.created_at else ''
-        ])
+    csv_data = CSVReportGenerator.generate(items)
 
     mem = io.BytesIO()
-    mem.write(output.getvalue().encode('utf-8'))
+    mem.write(csv_data.encode('utf-8'))
     mem.seek(0)
 
     return send_file(
@@ -259,46 +242,10 @@ def export_csv(current_user):
 def export_pdf(current_user):
     """Export history as downloadable PDF report."""
     items = History.query.filter_by(user_id=current_user.id).order_by(History.created_at.desc()).all()
+    pdf_buffer = PDFReportGenerator.generate(items, username=current_user.username)
 
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
-    styles = getSampleStyleSheet()
-    story = []
-
-    title_style = ParagraphStyle('TitleStyle', parent=styles['Heading1'], fontSize=18, textColor=colors.HexColor('#4F46E5'))
-    story.append(Paragraph(f"AI Text-to-Speech History Report", title_style))
-    story.append(Paragraph(f"User: <b>{current_user.username}</b> ({current_user.email})", styles['Normal']))
-    story.append(Spacer(1, 15))
-
-    data = [['ID', 'Text', 'Voice', 'Chars', 'Created At']]
-    for item in items:
-        text_snippet = (item.text[:40] + '...') if len(item.text) > 40 else item.text
-        data.append([
-            str(item.id),
-            Paragraph(text_snippet, styles['Normal']), # type: ignore
-            item.voice,
-            str(item.character_count),
-            item.created_at.strftime('%Y-%m-%d %H:%M') if item.created_at else ''
-        ])
-
-    table = Table(data, colWidths=[30, 260, 90, 50, 100])
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4F46E5')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E5E7EB')),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP')
-    ]))
-
-    story.append(table)
-    doc.build(story)
-
-    buffer.seek(0)
     return send_file(
-        buffer,
+        pdf_buffer,
         mimetype='application/pdf',
         as_attachment=True,
         download_name=f'tts_history_{current_user.username}.pdf'

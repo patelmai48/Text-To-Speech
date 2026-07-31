@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: voxai_web
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=prod_super_secret_key_change_me_12345
+      - JWT_SECRET_KEY=prod_jwt_secret_key_change_me_12345
+      - DATABASE_URL=postgresql://voxai:voxaipass@db:5432/voxaidb
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  db:
+    image: postgres:15-alpine
+    container_name: voxai_db
+    environment:
+      - POSTGRES_USER=voxai
+      - POSTGRES_PASSWORD=voxaipass
+      - POSTGRES_DB=voxaidb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voxai -d voxaidb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+volumes:
+  postgres_data:

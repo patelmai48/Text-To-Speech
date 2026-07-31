@@ -1,6 +1,8 @@
 import os
 from flask import Flask, render_template, jsonify, send_from_directory
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from config import config_by_name
 from models import db
 from routes.auth import auth_bp
@@ -18,14 +20,54 @@ def create_app(config_name=None):
     # Ensure audio output directory exists
     os.makedirs(app.config['AUDIO_FOLDER'], exist_ok=True)
 
-    # Initialize extensions
+    # Initialize Extensions
     db.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    
+    # Configurable CORS origins
+    allowed_origins = os.getenv('ALLOWED_ORIGINS', '*').split(',')
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
+
+    # Rate Limiter
+    limiter = Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=["300 per day", "60 per hour"],
+        storage_uri="memory://"
+    )
+
+    # Rate limit sensitive API Blueprints
+    limiter.limit("15 per minute")(auth_bp)
+    limiter.limit("30 per minute")(tts_bp)
 
     # Register API Blueprints
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(tts_bp, url_prefix='/api')
     app.register_blueprint(profile_bp, url_prefix='/api')
+
+    # Security Headers Middleware
+    @app.after_request
+    def add_security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        return response
+
+    # Health Check Endpoint for Cloud Orchestrators & Render
+    @app.route('/health')
+    def health_check():
+        try:
+            db.session.execute(db.text('SELECT 1'))
+            db_status = 'connected'
+        except Exception as e:
+            db_status = f'disconnected: {e}'
+            
+        status_code = 200 if db_status == 'connected' else 500
+        return jsonify({
+            'status': 'healthy' if db_status == 'connected' else 'degraded',
+            'database': db_status,
+            'service': 'VoxAI Studio'
+        }), status_code
 
     # Configure logging
     import logging
