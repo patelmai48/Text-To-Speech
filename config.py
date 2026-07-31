@@ -52,7 +52,8 @@ class Config:
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
 
     # Google Sign-in Client ID
-    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '593348183512-bi8t063tk73uesvqd6j643btukr8uia4.apps.googleusercontent.com')
+    _raw_google_id = os.getenv('GOOGLE_CLIENT_ID', '593348183512-bi8t063tk73uesvqd6j643btukr8uia4.apps.googleusercontent.com')
+    GOOGLE_CLIENT_ID = _raw_google_id.strip().replace('\n', '').replace('\r', '') if _raw_google_id else None
 
 class DevelopmentConfig(Config):
     DEBUG = True

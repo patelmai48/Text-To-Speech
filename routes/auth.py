@@ -364,6 +364,8 @@ def google_auth():
         username = data.get('username', email.split('@')[0])
     else:
         client_id = current_app.config.get('GOOGLE_CLIENT_ID')
+        if client_id:
+            client_id = client_id.strip().replace('\n', '').replace('\r', '')
         if not client_id or client_id.startswith('your-google-client-id'):
             return jsonify({'success': False, 'message': 'Google Sign-In is not configured on this server.'}), 501
 
