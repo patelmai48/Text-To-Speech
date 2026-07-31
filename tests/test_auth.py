@@ -97,3 +97,19 @@ def test_google_auth_simulation(client):
     data = response.get_json()
     assert data['success'] is True
     assert 'token' in data
+
+def test_refresh_token_success(client, auth_headers):
+    response = client.post('/api/auth/refresh', headers=auth_headers)
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['success'] is True
+    assert 'token' in data
+    assert data['user']['username'] == 'testuser'
+
+def test_verify_email_already_verified(client, auth_headers):
+    response = client.post('/api/auth/verify-email', headers=auth_headers, json={'code': '123456'})
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['success'] is True
+    assert 'already verified' in data['message'].lower()
+

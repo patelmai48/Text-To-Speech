@@ -203,6 +203,21 @@ def me(current_user):
         'user': current_user.to_dict()
     }), 200
 
+@auth_bp.route('/auth/refresh', methods=['POST'])
+@token_required
+def refresh_token(current_user):
+    """Issue a fresh JWT token for authenticated active user."""
+    token_payload = {
+        'user_id': current_user.id,
+        'exp': datetime.now(timezone.utc) + current_app.config.get('JWT_ACCESS_TOKEN_EXPIRES', timedelta(days=7))
+    }
+    new_token = jwt.encode(token_payload, current_app.config['JWT_SECRET_KEY'], algorithm='HS256')
+    return jsonify({
+        'success': True,
+        'token': new_token,
+        'user': current_user.to_dict()
+    }), 200
+
 @auth_bp.route('/auth/verify-email', methods=['POST'])
 @token_required
 def verify_email(current_user):

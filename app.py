@@ -51,8 +51,15 @@ def create_app(config_name=None):
         session_cookie_secure=not is_testing and not app.debug
     )
 
-    # Configurable CORS origins
-    allowed_origins = os.getenv('ALLOWED_ORIGINS', '*').split(',')
+    # Configurable CORS origins (restricts wildcard * in production)
+    raw_origins = os.getenv('ALLOWED_ORIGINS')
+    if raw_origins:
+        allowed_origins = [origin.strip() for origin in raw_origins.split(',')]
+    elif is_testing or app.debug:
+        allowed_origins = '*'
+    else:
+        allowed_origins = ['http://localhost:5000', 'http://127.0.0.1:5000']
+
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
 
     # Rate Limiter
@@ -79,6 +86,7 @@ def create_app(config_name=None):
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['X-Frame-Options'] = 'DENY'
         response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
         return response
 
@@ -134,7 +142,9 @@ def create_app(config_name=None):
     # Serve generated audio files directly if requested via /static/audio/<filename>
     @app.route('/static/audio/<filename>')
     def serve_audio(filename):
-        return send_from_directory(app.config['AUDIO_FOLDER'], filename)
+        res = send_from_directory(app.config['AUDIO_FOLDER'], filename)
+        res.headers['Cache-Control'] = 'public, max-age=86400'
+        return res
 
     # Global Error Handlers
     @app.errorhandler(404)
