@@ -159,14 +159,37 @@ def delete_summary(current_user, summary_id):
 @token_required
 @verification_required
 def get_history(current_user):
-    """Retrieve user conversion history with optional search query."""
+    """Retrieve user conversion history with optional search query and pagination."""
     search = request.args.get('search', '').strip()
+    page_param = request.args.get('page')
+    per_page_param = request.args.get('per_page')
+
     query = History.query.filter_by(user_id=current_user.id)
 
     if search:
         query = query.filter(History.text.ilike(f'%{search}%'))
 
-    history_records = query.order_by(History.created_at.desc()).all()
+    query = query.order_by(History.created_at.desc())
+
+    if page_param is not None or per_page_param is not None:
+        try:
+            page = max(1, int(page_param or 1))
+            per_page = min(100, max(1, int(per_page_param or 20)))
+        except ValueError:
+            return jsonify({'success': False, 'message': 'Invalid page or per_page integer value.'}), 400
+
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        return jsonify({
+            'success': True,
+            'count': len(pagination.items),
+            'total_count': pagination.total,
+            'page': pagination.page,
+            'per_page': pagination.per_page,
+            'total_pages': pagination.pages,
+            'history': [item.to_dict() for item in pagination.items]
+        }), 200
+
+    history_records = query.all()
     return jsonify({
         'success': True,
         'count': len(history_records),

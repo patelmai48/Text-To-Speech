@@ -167,7 +167,14 @@ def login():
         (User.email == email_or_username.lower()) | (User.username == email_or_username)
     ).first()
 
-    if not user or not user.check_password(password):
+    # Equalize response timing to prevent timing attacks
+    if not user:
+        from werkzeug.security import check_password_hash
+        # Dummy hash comparison to simulate password verification time
+        check_password_hash('scrypt:32768:8:1$dummy$0000000000000000000000000000000000000000000000000000000000000000', password)
+        return jsonify({'success': False, 'message': 'Invalid credentials. Please check username/email and password.'}), 401
+
+    if not user.check_password(password):
         return jsonify({'success': False, 'message': 'Invalid credentials. Please check username/email and password.'}), 401
 
     # Update last login timestamp

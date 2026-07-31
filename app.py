@@ -56,11 +56,12 @@ def create_app(config_name=None):
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
 
     # Rate Limiter
+    redis_url = os.getenv('REDIS_URL', 'memory://')
     limiter = Limiter(
         get_remote_address,
         app=app,
         default_limits=["300 per day", "60 per hour"],
-        storage_uri="memory://"
+        storage_uri=redis_url
     )
 
     # Rate limit sensitive API Blueprints

@@ -2476,4 +2476,81 @@ a:focus-visible {
   border-radius: var(--input-radius);
   border: 1px solid var(--glass-border);
 }
+
+/* ==========================================================================
+   Mobile Web (Android Chrome) Ergonomics & UI/UX Audit Improvements
+   ========================================================================== */
+
+/* Enhanced Contrast for Outdoor Mobile Readability */
+:root {
+  --text-muted: #cbd5e1;
+}
+
+[data-theme="light"] {
+  --text-muted: #334155;
+}
+
+/* Dynamic Viewport Unit Fixes for Mobile Browsers */
+html, body {
+  min-height: 100dvh;
+}
+
+.modal-backdrop,
+.modal-content,
+.auth-container,
+.sidebar {
+  max-height: 100dvh;
+}
+
+/* Reserve Safe Bottom Padding for Floating Audio Player */
+.main-content,
+.view-panel,
+.history-container,
+.summaries-grid {
+  padding-bottom: 90px !important;
+}
+
+/* Mobile Viewport Sizing & Touch Ergonomics (WCAG 2.1 AA 44px Minimum Touch Targets) */
+@media (max-width: 768px) {
+  /* Enforce Minimum Touch Target Sizes for Action Buttons */
+  button,
+  .btn,
+  .action-btn,
+  .nav-item,
+  .theme-toggle,
+  .icon-btn,
+  .voice-card,
+  .input-control,
+  .sim-account-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Increase Spacing & Padding for Touch Accuracy */
+  .action-btn {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .nav-item {
+    padding: 12px 16px;
+    margin-bottom: 6px;
+  }
+
+  /* Toast Notification Safe Distance */
+  .toast-container {
+    top: 16px !important;
+    right: 16px !important;
+    left: 16px !important;
+  }
+
+  /* Bottom Audio Bar Mobile Layout */
+  .audio-player-bar {
+    padding: 12px 16px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 16px 16px 0 0;
+  }
+}
 

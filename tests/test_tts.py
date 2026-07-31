@@ -44,6 +44,19 @@ def test_get_history(client, auth_headers):
     assert data['success'] is True
     assert len(data['history']) >= 1
 
+def test_get_history_pagination(client, auth_headers):
+    for i in range(3):
+        client.post('/api/tts', json={'text': f'Paginated text item {i}'}, headers=auth_headers)
+
+    response = client.get('/api/history?page=1&per_page=2', headers=auth_headers)
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['success'] is True
+    assert data['page'] == 1
+    assert data['per_page'] == 2
+    assert len(data['history']) == 2
+    assert 'total_count' in data
+
 def test_export_history_csv(client, auth_headers):
     client.post('/api/tts', json={'text': 'Export test'}, headers=auth_headers)
     response = client.get('/api/history/export/csv', headers=auth_headers)
