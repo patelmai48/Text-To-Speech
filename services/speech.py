@@ -6,30 +6,86 @@ from collections import Counter
 from gtts import gTTS
 
 SUPPORTED_LANGUAGES = [
-    {"code": "en", "tld": "com", "name": "English (US)", "voice_id": "en-us", "flag": "🇺🇸", "gender": "Female"},
-    {"code": "en", "tld": "co.uk", "name": "English (UK)", "voice_id": "en-uk", "flag": "🇬🇧", "gender": "Female"},
-    {"code": "en", "tld": "co.in", "name": "English (India)", "voice_id": "en-in", "flag": "🇮🇳", "gender": "Female"},
+    # English Accents
+    {"code": "en", "tld": "com", "name": "English (US) - Standard", "voice_id": "en-us", "flag": "🇺🇸", "gender": "Female"},
+    {"code": "en", "tld": "edge", "name": "English (US) - Emma (Neural)", "voice_id": "en-us-female-neural", "flag": "🇺🇸", "gender": "Female"},
+    {"code": "en", "tld": "edge", "name": "English (US) - Andrew (Neural Male)", "voice_id": "en-us-male-neural", "flag": "🇺🇸", "gender": "Male"},
+    {"code": "en", "tld": "co.uk", "name": "English (UK) - Standard", "voice_id": "en-uk", "flag": "🇬🇧", "gender": "Female"},
+    {"code": "en", "tld": "edge", "name": "English (UK) - Sonia (Neural)", "voice_id": "en-uk-female-neural", "flag": "🇬🇧", "gender": "Female"},
+    {"code": "en", "tld": "edge", "name": "English (UK) - Ryan (Neural Male)", "voice_id": "en-uk-male-neural", "flag": "🇬🇧", "gender": "Male"},
+    {"code": "en", "tld": "co.in", "name": "English (India) - Standard", "voice_id": "en-in", "flag": "🇮🇳", "gender": "Female"},
+    {"code": "en", "tld": "edge", "name": "English (India) - Neerja (Neural)", "voice_id": "en-in-female-neural", "flag": "🇮🇳", "gender": "Female"},
+    {"code": "en", "tld": "edge", "name": "English (India) - Prabhat (Neural Male)", "voice_id": "en-in-male-neural", "flag": "🇮🇳", "gender": "Male"},
     {"code": "en", "tld": "com.au", "name": "English (Australia)", "voice_id": "en-au", "flag": "🇦🇺", "gender": "Female"},
+    {"code": "en", "tld": "ca", "name": "English (Canada)", "voice_id": "en-ca", "flag": "🇨🇦", "gender": "Female"},
+
+    # Spanish
     {"code": "es", "tld": "es", "name": "Spanish (Spain)", "voice_id": "es-es", "flag": "🇪🇸", "gender": "Female"},
+    {"code": "es", "tld": "edge", "name": "Spanish (Spain) - Elvira (Neural)", "voice_id": "es-es-neural", "flag": "🇪🇸", "gender": "Female"},
     {"code": "es", "tld": "com.mx", "name": "Spanish (Mexico)", "voice_id": "es-mx", "flag": "🇲🇽", "gender": "Female"},
+
+    # French
     {"code": "fr", "tld": "fr", "name": "French (France)", "voice_id": "fr-fr", "flag": "🇫🇷", "gender": "Female"},
+    {"code": "fr", "tld": "edge", "name": "French (France) - Denise (Neural)", "voice_id": "fr-fr-neural", "flag": "🇫🇷", "gender": "Female"},
     {"code": "fr", "tld": "ca", "name": "French (Canada)", "voice_id": "fr-ca", "flag": "🇨🇦", "gender": "Female"},
+
+    # German
     {"code": "de", "tld": "de", "name": "German (Germany)", "voice_id": "de-de", "flag": "🇩🇪", "gender": "Female"},
-    {"code": "hi", "tld": "co.in", "name": "Hindi (India)", "voice_id": "hi-in", "flag": "🇮🇳", "gender": "Female"},
+    {"code": "de", "tld": "edge", "name": "German (Germany) - Katja (Neural)", "voice_id": "de-de-neural", "flag": "🇩🇪", "gender": "Female"},
+
+    # Asian & Indian Languages
+    {"code": "hi", "tld": "co.in", "name": "Hindi (India) - Standard", "voice_id": "hi-in", "flag": "🇮🇳", "gender": "Female"},
+    {"code": "hi", "tld": "edge", "name": "Hindi (India) - Swara (Neural)", "voice_id": "hi-in-female-neural", "flag": "🇮🇳", "gender": "Female"},
+    {"code": "hi", "tld": "edge", "name": "Hindi (India) - Madhur (Neural Male)", "voice_id": "hi-in-male-neural", "flag": "🇮🇳", "gender": "Male"},
+    {"code": "gu", "tld": "co.in", "name": "Gujarati (India)", "voice_id": "gu-in", "flag": "🇮🇳", "gender": "Female"},
+    {"code": "mr", "tld": "co.in", "name": "Marathi (India)", "voice_id": "mr-in", "flag": "🇮🇳", "gender": "Female"},
+    {"code": "ta", "tld": "co.in", "name": "Tamil (India)", "voice_id": "ta-in", "flag": "🇮🇳", "gender": "Female"},
+    {"code": "te", "tld": "co.in", "name": "Telugu (India)", "voice_id": "te-in", "flag": "🇮🇳", "gender": "Female"},
+    {"code": "bn", "tld": "co.in", "name": "Bengali (India)", "voice_id": "bn-in", "flag": "🇮🇳", "gender": "Female"},
     {"code": "ja", "tld": "co.jp", "name": "Japanese (Japan)", "voice_id": "ja-jp", "flag": "🇯🇵", "gender": "Female"},
-    {"code": "zh-CN", "tld": "com", "name": "Chinese (Mandarin)", "voice_id": "zh-cn", "flag": "🇨🇳", "gender": "Female"},
-    {"code": "it", "tld": "it", "name": "Italian (Italy)", "voice_id": "it-it", "flag": "🇮🇹", "gender": "Female"},
-    {"code": "pt", "tld": "com.br", "name": "Portuguese (Brazil)", "voice_id": "pt-br", "flag": "🇧🇷", "gender": "Female"},
-    {"code": "ru", "tld": "ru", "name": "Russian (Russia)", "voice_id": "ru-ru", "flag": "🇷🇺", "gender": "Female"},
-    {"code": "ar", "tld": "com", "name": "Arabic (Standard)", "voice_id": "ar-sa", "flag": "🇸🇦", "gender": "Female"},
+    {"code": "ja", "tld": "edge", "name": "Japanese (Japan) - Nanami (Neural)", "voice_id": "ja-jp-neural", "flag": "🇯🇵", "gender": "Female"},
     {"code": "ko", "tld": "co.kr", "name": "Korean (South Korea)", "voice_id": "ko-kr", "flag": "🇰🇷", "gender": "Female"},
-    
-    # High-quality Microsoft Edge Neural Voices
-    {"code": "en", "tld": "edge", "name": "English (US) - Female (Neural)", "voice_id": "en-us-female-neural", "flag": "🇺🇸", "gender": "Female"}
+    {"code": "ko", "tld": "edge", "name": "Korean (South Korea) - SunHi (Neural)", "voice_id": "ko-kr-neural", "flag": "🇰🇷", "gender": "Female"},
+    {"code": "zh-CN", "tld": "com", "name": "Chinese (Mandarin)", "voice_id": "zh-cn", "flag": "🇨🇳", "gender": "Female"},
+    {"code": "zh-CN", "tld": "edge", "name": "Chinese (Mandarin) - Xiaoxiao (Neural)", "voice_id": "zh-cn-neural", "flag": "🇨🇳", "gender": "Female"},
+    {"code": "vi", "tld": "com", "name": "Vietnamese (Vietnam)", "voice_id": "vi-vn", "flag": "🇻🇳", "gender": "Female"},
+    {"code": "id", "tld": "co.id", "name": "Indonesian (Indonesia)", "voice_id": "id-id", "flag": "🇮🇩", "gender": "Female"},
+    {"code": "th", "tld": "co.th", "name": "Thai (Thailand)", "voice_id": "th-th", "flag": "🇹🇭", "gender": "Female"},
+
+    # European & Middle Eastern Languages
+    {"code": "it", "tld": "it", "name": "Italian (Italy)", "voice_id": "it-it", "flag": "🇮🇹", "gender": "Female"},
+    {"code": "it", "tld": "edge", "name": "Italian (Italy) - Elsa (Neural)", "voice_id": "it-it-neural", "flag": "🇮🇹", "gender": "Female"},
+    {"code": "pt", "tld": "com.br", "name": "Portuguese (Brazil)", "voice_id": "pt-br", "flag": "🇧🇷", "gender": "Female"},
+    {"code": "pt", "tld": "pt", "name": "Portuguese (Portugal)", "voice_id": "pt-pt", "flag": "🇵🇹", "gender": "Female"},
+    {"code": "ru", "tld": "ru", "name": "Russian (Russia)", "voice_id": "ru-ru", "flag": "🇷🇺", "gender": "Female"},
+    {"code": "ru", "tld": "edge", "name": "Russian (Russia) - Svetlana (Neural)", "voice_id": "ru-ru-neural", "flag": "🇷🇺", "gender": "Female"},
+    {"code": "ar", "tld": "com", "name": "Arabic (Standard)", "voice_id": "ar-sa", "flag": "🇸🇦", "gender": "Female"},
+    {"code": "ar", "tld": "edge", "name": "Arabic (Saudi Arabia) - Zariyah (Neural)", "voice_id": "ar-sa-neural", "flag": "🇸🇦", "gender": "Female"},
+    {"code": "tr", "tld": "com.tr", "name": "Turkish (Turkey)", "voice_id": "tr-tr", "flag": "🇹🇷", "gender": "Female"},
+    {"code": "nl", "tld": "nl", "name": "Dutch (Netherlands)", "voice_id": "nl-nl", "flag": "🇳🇱", "gender": "Female"},
+    {"code": "pl", "tld": "pl", "name": "Polish (Poland)", "voice_id": "pl-pl", "flag": "🇵🇱", "gender": "Female"},
+    {"code": "sv", "tld": "se", "name": "Swedish (Sweden)", "voice_id": "sv-se", "flag": "🇸🇪", "gender": "Female"},
+    {"code": "uk", "tld": "com", "name": "Ukrainian (Ukraine)", "voice_id": "uk-ua", "flag": "🇺🇦", "gender": "Female"}
 ]
 
 EDGE_VOICE_MAPPING = {
-    "en-us-female-neural": "en-US-EmmaNeural"
+    "en-us-female-neural": "en-US-EmmaNeural",
+    "en-us-male-neural": "en-US-AndrewNeural",
+    "en-uk-female-neural": "en-GB-SoniaNeural",
+    "en-uk-male-neural": "en-GB-RyanNeural",
+    "en-in-female-neural": "en-IN-NeerjaNeural",
+    "en-in-male-neural": "en-IN-PrabhatNeural",
+    "es-es-neural": "es-ES-ElviraNeural",
+    "fr-fr-neural": "fr-FR-DeniseNeural",
+    "de-de-neural": "de-DE-KatjaNeural",
+    "hi-in-female-neural": "hi-IN-SwaraNeural",
+    "hi-in-male-neural": "hi-IN-MadhurNeural",
+    "ja-jp-neural": "ja-JP-NanamiNeural",
+    "ko-kr-neural": "ko-KR-SunHiNeural",
+    "zh-cn-neural": "zh-CN-XiaoxiaoNeural",
+    "it-it-neural": "it-IT-ElsaNeural",
+    "ru-ru-neural": "ru-RU-SvetlanaNeural",
+    "ar-sa-neural": "ar-SA-ZariyahNeural"
 }
 
 def get_voice_meta(voice_id):
