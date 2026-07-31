@@ -16,7 +16,6 @@ class User(db.Model):
 
     email_verified = db.Column(db.Boolean, default=False, nullable=False)
     verification_code = db.Column(db.String(32), nullable=True)
-    verification_code_expiry = db.Column(db.DateTime, nullable=True)
     reset_code = db.Column(db.String(32), nullable=True)
     reset_code_expiry = db.Column(db.DateTime, nullable=True)
 

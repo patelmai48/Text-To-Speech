@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 import pytest
 
 def test_health_check(client):
