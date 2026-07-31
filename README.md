@@ -12,10 +12,11 @@ A modern, production-ready Full Stack AI Text-to-Speech (TTS) Web Application bu
 - **Security Headers & CSP**: Standard security headers and Content Security Policy (CSP) powered by **Flask-Talisman**.
 - **API Rate Limiting**: Built-in request rate limiting using **Flask-Limiter** with IP tracking (`get_remote_address`) to protect endpoints against brute-force attacks and abuse.
 - **Password Hashing**: Industry-standard salted hashing powered by `Werkzeug.security`.
-- **Dynamic Google OAuth Account Manager**:
-  - Official Google OAuth dark-mode dialog layout.
-  - **Browser-Specific Memory**: Saves signed-in Google accounts locally per browser for instant single-click repeat relogin without password errors.
-  - **Account Switching**: Clean "Use another account" view allowing users to add or switch Gmail accounts seamlessly without hardcoded personal emails.
+- **Google OAuth 2.0 Integration**:
+  - Official Google Identity Services popup & One-Tap integration.
+  - **Cryptographic Backend Verification**: Every Google ID token is verified directly against Google OAuth servers (`oauth2.googleapis.com`).
+  - **Strict Email Verification**: Enforces Google's `email_verified` claim to reject unverified email addresses.
+  - **Seamless Account Provisioning**: Auto-creates verified, secure user accounts upon authentic Google Sign-In without manual registration forms.
 - **Password Visibility Toggles**: Interactive `👁` show/hide toggles across all password input fields.
 - **Account Deletion Safety**: Redesigned Danger Zone requiring explicit `"DELETE"` text confirmation before account removal.
 
@@ -202,7 +203,21 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### 4. Launch the Application
+#### 4. Configure Environment & Google OAuth (Optional)
+Copy `.env.example` to `.env` and set your credentials:
+```bash
+cp .env.example .env
+```
+To enable Google Sign-In:
+1. Obtain an OAuth 2.0 Client ID from the [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+2. Set Application type to **Web application**.
+3. Add `http://localhost:5000` and `http://127.0.0.1:5000` under **Authorized JavaScript origins**.
+4. Paste your Client ID into `.env`:
+   ```env
+   GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+   ```
+
+#### 5. Launch the Application
 ```bash
 python app.py
 ```
@@ -233,11 +248,3 @@ https://text-to-speech-efmm.onrender.com
 
 ## 📜 License
 Distributed under the MIT License. See `LICENSE` for details.
-ments.txt
-```
-
-### 4. Launch the Application
-```bash
-python app.py
-```
-Open your browser and navigate to **`http://127.0.0.1:5000`**.
