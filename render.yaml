@@ -14,5 +14,5 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: GOOGLE_CLIENT_ID
-        sync: false
+        value: "593348183512-0q07eea69snabft1ocmdf83eg1nou2e3.apps.googleusercontent.com"
 
