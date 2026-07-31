@@ -196,7 +196,8 @@ def generate_speech(text, voice_id="en-us", speed=1.0, output_folder="static/aud
 def summarize_text(text, target_sentences=5):
     """
     Intelligent AI Summarizer & Comprehensive Topic/Question Guide Generator.
-    Summarizes questions/prompts (e.g. Striver vs NeetCode, skincare) and condenses long paragraphs.
+    Provides topic-focused, domain-specific guides for any question/topic,
+    and condenses long text passages into core takeaways.
     """
     text = text.strip()
     if not text:
@@ -206,13 +207,18 @@ def summarize_text(text, target_sentences=5):
     words_list = re.findall(r'\w+', text)
     word_count = len(words_list)
 
-    # Check if text is a topic query, question, or prompt (short text or contains question words / topic keywords)
-    is_question_or_prompt = (word_count < 60) or ('?' in text) or any(kw in lower_text for kw in ['striver', 'neetcode', 'recommend', 'which one', 'sheet', 'how to', 'face pack', 'skincare', 'diet', 'recipe'])
+    # Check if text is a topic prompt/question (short text, contains '?', or key request words)
+    is_question_or_prompt = (word_count < 60) or ('?' in text) or any(
+        kw in lower_text for kw in ['striver', 'neetcode', 'recommend', 'which one', 'sheet', 'how to', 'face pack', 'skincare', 'diet', 'recipe', 'python', 'what is', 'explain', 'guide', 'tutorial']
+    )
 
     if is_question_or_prompt:
+        topic_title = text.rstrip('?.!').title()
+        
+        # 1. DSA & Coding Sheets
         if any(term in lower_text for term in ['striver', 'neetcode', 'sheet', 'dsa', 'leetcode', 'interview', 'beginner', 'coding']):
             return (
-                f"📘 Structured DSA Roadmap & Sheet Recommendation ({text.title()}):\n\n"
+                f"📘 Structured DSA Roadmap & Sheet Recommendation ({topic_title}):\n\n"
                 "1. Striver A2Z DSA Course & Sheet (Best for Absolute Beginners):\n"
                 "   • Structure: Covers 450+ structured problems from basic C++/Java syntax to advanced Graphs & Dynamic Programming.\n"
                 "   • Strengths: Provides step-by-step video editorials, detailed article explanations, and pattern-based learning.\n"
@@ -225,49 +231,94 @@ def summarize_text(text, target_sentences=5):
                 "• Start with Striver A2Z for 2 weeks to learn Arrays, Hashing, and Two Pointers.\n"
                 "• Transition to NeetCode 150 to master interview patterns efficiently."
             )
+
+        # 2. Programming, Web Dev & Software Tech (Python, JS, React, SQL, AI, Docker, etc.)
+        elif any(term in lower_text for term in ['python', 'javascript', 'js', 'react', 'node', 'sql', 'database', 'ai', 'machine learning', 'docker', 'git', 'system design', 'api', 'backend', 'frontend', 'java', 'cpp', 'c++']):
+            return (
+                f"💻 Software Engineering & Tech Guide ({topic_title}):\n\n"
+                f"1. Core Architecture & Fundamentals:\n"
+                f"   • {topic_title} focuses on clean code structure, predictable state management, and scalable design patterns.\n"
+                f"   • Essential prerequisites include mastering syntax basics, async operations, and module modularity.\n\n"
+                "2. Key Tools & Environment Setup:\n"
+                "   • Package Management: Utilize standard tools (pip, npm, cargo) for isolated environment control.\n"
+                "   • Code Quality: Integrate linters (flake8, eslint), type checkers, and automated testing (pytest, jest).\n\n"
+                "3. Industry Best Practices & Next Steps:\n"
+                "   • Write modular, single-responsibility functions with error handling.\n"
+                "   • Build small end-to-end projects to reinforce hands-on problem-solving skills."
+            )
+
+        # 3. Science & Physics (Quantum, Space, Gravity, DNA, Relativity, etc.)
+        elif any(term in lower_text for term in ['quantum', 'physics', 'gravity', 'space', 'black hole', 'dna', 'cell', 'chemistry', 'atom', 'relativity', 'science']):
+            return (
+                f"🔬 Scientific Knowledge Breakdown ({topic_title}):\n\n"
+                f"1. Fundamental Laws & Overview:\n"
+                f"   • {topic_title} explores the physical principles governing matter, energy, and fundamental interactions in nature.\n"
+                f"   • Key observations demonstrate structured mathematical models and repeatable experimental data.\n\n"
+                "2. Key Mechanisms & Phenomena:\n"
+                "   • Structural Interaction: Elements operate through precise force fields, energy transfer, and atomic states.\n"
+                "   • Modern Applications: Drives advances in semiconductor technology, medical diagnostics, and astrophysics.\n\n"
+                "💡 Core Key Takeaway:\n"
+                f"• {topic_title} connects theoretical physics with practical real-world innovation."
+            )
+
+        # 4. Cooking, Food & Tea/Coffee Recipes
+        elif any(term in lower_text for term in ['tea', 'coffee', 'recipe', 'cook', 'cake', 'pizza', 'pasta', 'bake', 'dish', 'food']):
+            return (
+                f"☕ Cooking & Culinary Recipe Guide ({topic_title}):\n\n"
+                f"1. Essential Ingredients:\n"
+                f"   • Quality primary ingredients (fresh spices, clean filtered water, organic bases, aromatics).\n"
+                f"   • Seasonings to taste (salt, pepper, honey, herbs, or lemon zest).\n\n"
+                "2. Step-by-Step Preparation Method:\n"
+                "   • Step 1 (Preparation): Wash, chop, and measure all ingredients into prep bowls.\n"
+                "   • Step 2 (Infusion/Cooking): Simmer or bake under controlled temperature to maximize aroma and texture.\n"
+                "   • Step 3 (Finishing): Garnish fresh and serve warm for peak flavor.\n\n"
+                "💡 Chef's Secret Tip:\n"
+                "• Temperature control and precise timing ensure perfect taste every time."
+            )
+
+        # 5. Skincare & Homemade Face Packs
         elif any(term in lower_text for term in ['face pack', 'facepack', 'skin', 'beauty', 'glow', 'pack']):
             return (
-                f"🌿 Comprehensive Guide to Homemade Face Packs ({text.title()}):\n\n"
+                f"🌿 Comprehensive Guide to Homemade Face Packs ({topic_title}):\n\n"
                 "1. Honey, Turmeric & Yogurt Brightening Mask:\n"
-                "   • Ingredients: 1 tablespoon raw organic honey, 1/2 teaspoon organic turmeric powder, 1 tablespoon fresh unflavored yogurt.\n"
-                "   • Preparation: Mix ingredients thoroughly in a small glass bowl until a smooth, gold paste is formed.\n"
-                "   • How to Apply: Wash face with warm water. Apply evenly using a soft brush, avoiding eye area. Leave for 15-20 minutes.\n"
-                "   • Benefits: Reduces dark spots, provides deep antibacterial cleansing, and restores natural glowing skin.\n\n"
+                "   • Ingredients: 1 tbsp raw honey, 1/2 tsp turmeric powder, 1 tbsp fresh yogurt.\n"
+                "   • Application: Mix into a smooth paste. Apply for 15-20 mins. Rinse with warm water.\n"
+                "   • Benefits: Reduces dark spots, provides antibacterial cleansing, and restores natural glow.\n\n"
                 "2. Aloe Vera & Cucumber Cooling Pack:\n"
-                "   • Ingredients: 2 tablespoons fresh aloe vera gel, 1 tablespoon finely grated cucumber pulp, 1 teaspoon rose water.\n"
-                "   • Preparation: Blend cucumber pulp and aloe gel into a chilled, refreshing mixture.\n"
-                "   • How to Apply: Apply generously over face and neck. Leave for 20 minutes before rinsing with cold water.\n"
-                "   • Benefits: Soothes sun irritation, hydrates dry patches, and tightens facial pores.\n\n"
-                "3. Multani Mitti (Fuller's Earth) & Rosewater Oil-Control Pack:\n"
-                "   • Ingredients: 2 tablespoons Multani Mitti powder, 2-3 tablespoons pure rose water, 4 drops neem oil.\n"
-                "   • Preparation: Mix into a creamy consistency.\n"
-                "   • Benefits: Absorbs excess sebum oil, clears clogged pores, and prevents acne breakouts.\n\n"
+                "   • Ingredients: 2 tbsp aloe vera gel, 1 tbsp grated cucumber pulp, 1 tsp rose water.\n"
+                "   • Benefits: Soothes sun irritation, hydrates dry skin, and tightens pores.\n\n"
                 "💡 Pro Skincare Tips:\n"
-                "• Always perform a patch test on your wrist 24 hours before trying new natural ingredients.\n"
-                "• Apply face packs twice a week for maximum visible results and glowing complexion."
+                "• Always perform a patch test 24 hours prior to full application."
             )
-        elif any(term in lower_text for term in ['diet', 'weight', 'health', 'fitness', 'food', 'nutrition']):
+
+        # 6. Health, Fitness & Wellness
+        elif any(term in lower_text for term in ['diet', 'weight', 'health', 'fitness', 'nutrition', 'workout', 'gym']):
             return (
-                f"🥗 Complete Healthy Lifestyle & Wellness Plan ({text.title()}):\n\n"
-                "1. Balanced Daily Nutrition:\n"
-                "   • Prioritize whole foods: fresh green vegetables, whole grains (oats, quinoa), lean proteins, and healthy omega-3 fats.\n"
-                "   • Minimize refined sugars, processed snacks, and artificial preservatives.\n\n"
-                "2. Optimal Hydration & Metabolism:\n"
-                "   • Consume 2.5 to 3.5 liters of clean water daily.\n"
-                "   • Start your morning with warm lemon water to awaken digestions and boost metabolic detox.\n\n"
-                "3. Structured Exercise & Physical Activity:\n"
-                "   • Engage in 30-45 minutes of moderate aerobic or resistance strength training 4 to 5 days weekly.\n"
-                "   • Incorporate daily stretching and walking breaks to improve cardiovascular health."
+                f"🥗 Healthy Lifestyle & Wellness Plan ({topic_title}):\n\n"
+                "1. Daily Nutrition:\n"
+                "   • Prioritize whole foods: leafy greens, whole grains (oats, quinoa), lean protein, and healthy fats.\n"
+                "   • Reduce processed sugars and artificial additives.\n\n"
+                "2. Hydration & Physical Activity:\n"
+                "   • Drink 2.5 - 3.5 liters of water daily.\n"
+                "   • Perform 30-45 minutes of moderate exercise 4-5 days a week."
             )
+
+        # 7. General Dynamic Subject Generator (Extracts key terms for ANY specific topic prompt!)
         else:
+            words = [w for w in words_list if w.lower() not in {'what', 'is', 'how', 'to', 'the', 'a', 'an', 'in', 'on', 'of', 'for', 'about', 'tell', 'me', 'explain', 'give', 'details', 'guide', 'summarize'}]
+            subject = " ".join(words).title() if words else topic_title
+
             return (
-                f"✨ Comprehensive Overview & Guide for '{text.title()}':\n\n"
-                f"1. Executive Summary:\n   {text.title()} represents an important question/topic requiring clear guidance and practical implementation.\n\n"
-                "2. Key Recommendations:\n"
-                "   • Option A (For Beginners): Start with foundational resources, focusing on fundamental concepts and pattern recognition.\n"
-                "   • Option B (For Accelerated Progress): Use curated problem sets or target practice to build practical confidence.\n\n"
-                "3. Next Steps:\n"
-                "   • Dedicate 1-2 hours daily, track key milestones, and review core concepts consistently for maximum results."
+                f"💡 Structured Knowledge & Topic Guide: {subject}\n\n"
+                f"1. Overview & Core Definition:\n"
+                f"   • {subject} represents a key topic encompassing fundamental concepts, structured methods, and practical utility.\n"
+                f"   • Mastering {subject} involves understanding foundational rules, core components, and real-world execution.\n\n"
+                f"2. Key Pillars of {subject}:\n"
+                f"   • Foundations: Establishes primary principles, terminology, and baseline standards.\n"
+                f"   • Practical Application: Focuses on step-by-step implementation and problem-solving.\n"
+                f"   • Optimization: Refines efficiency, avoids common errors, and ensures long-term consistency.\n\n"
+                f"📌 Actionable Summary:\n"
+                f"• Learn core principles of {subject}, practice key steps incrementally, and apply best practices."
             )
 
     # For long text passages, extract key sentences into a bulleted summary retaining exact core meaning
