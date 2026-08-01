@@ -2567,7 +2567,7 @@ html, body {
 }
 
 /* ==========================================================================
-   NEO-BRUTALISM UI DESIGN SYSTEM (THEME SPLIT: LIGHT = BLACK BORDERS, DARK = LIGHTER BORDERS)
+   NEO-BRUTALISM UI DESIGN SYSTEM (LIGHT = BOLD BLACK BORDERS, DARK = LIGHTER BORDERS)
    ========================================================================== */
 
 /* --- Neo-Brutalism Global Tokens --- */
@@ -2575,25 +2575,25 @@ html, body {
 [data-theme="light"] {
   --neo-border-color: #000000;
   --neo-shadow-color: #000000;
-  --neo-card-border-width: 3px;
-  --neo-btn-border-width: 2.5px;
-  --neo-badge-border-width: 2px;
-  --neo-card-shadow: 5px 5px 0px #000000;
-  --neo-card-hover-shadow: 7px 7px 0px #000000;
-  --neo-btn-shadow: 4px 4px 0px #000000;
-  --neo-btn-hover-shadow: 6px 6px 0px #000000;
+  --neo-card-border-width: 2.5px;
+  --neo-btn-border-width: 2px;
+  --neo-badge-border-width: 1.5px;
+  --neo-card-shadow: 4px 4px 0px #000000;
+  --neo-card-hover-shadow: 6px 6px 0px #000000;
+  --neo-btn-shadow: 3px 3px 0px #000000;
+  --neo-btn-hover-shadow: 5px 5px 0px #000000;
 }
 
 [data-theme="dark"] {
-  --neo-border-color: rgba(255, 255, 255, 0.22);
-  --neo-shadow-color: rgba(0, 0, 0, 0.8);
-  --neo-card-border-width: 2px;
-  --neo-btn-border-width: 1.5px;
-  --neo-badge-border-width: 1.5px;
-  --neo-card-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8);
-  --neo-card-hover-shadow: 5px 5px 0px rgba(0, 0, 0, 0.8);
-  --neo-btn-shadow: 3px 3px 0px rgba(0, 0, 0, 0.8);
-  --neo-btn-hover-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8);
+  --neo-border-color: rgba(255, 255, 255, 0.15);
+  --neo-shadow-color: rgba(0, 0, 0, 0.5);
+  --neo-card-border-width: 1.5px;
+  --neo-btn-border-width: 1px;
+  --neo-badge-border-width: 1px;
+  --neo-card-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+  --neo-card-hover-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+  --neo-btn-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+  --neo-btn-hover-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
 }
 
 /* Neo-Brutalist Cards */
@@ -2635,8 +2635,8 @@ html, body {
   box-shadow: var(--neo-btn-shadow) !important;
   font-weight: 700 !important;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-radius: 8px !important;
+  letter-spacing: 0.4px;
+  border-radius: 6px !important;
   transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease !important;
 }
 
@@ -2648,7 +2648,7 @@ html, body {
 .play-circle-btn:hover:not(:disabled),
 .btn-google:hover:not(:disabled),
 .icon-btn:hover:not(:disabled) {
-  transform: translate(-2px, -2px) !important;
+  transform: translate(-1px, -1px) !important;
   box-shadow: var(--neo-btn-hover-shadow) !important;
 }
 
@@ -2669,8 +2669,8 @@ html, body {
 .select-custom,
 .text-editor {
   border: var(--neo-btn-border-width) solid var(--neo-border-color) !important;
-  box-shadow: 3px 3px 0px var(--neo-shadow-color) !important;
-  border-radius: 8px !important;
+  box-shadow: 2.5px 2.5px 0px var(--neo-shadow-color) !important;
+  border-radius: 6px !important;
   font-weight: 600 !important;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.15s ease !important;
 }
@@ -2679,7 +2679,7 @@ html, body {
 .select-custom:focus,
 .text-editor:focus {
   border-color: var(--accent-primary) !important;
-  box-shadow: 4px 4px 0px var(--neo-shadow-color) !important;
+  box-shadow: 3px 3px 0px var(--neo-shadow-color) !important;
 }
 
 /* Badges */
@@ -2691,15 +2691,15 @@ html, body {
 .usage-badge,
 .voice-gender-text {
   border: var(--neo-badge-border-width) solid var(--neo-border-color) !important;
-  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
-  font-weight: 800 !important;
-  border-radius: 6px !important;
+  box-shadow: 1.5px 1.5px 0px var(--neo-shadow-color) !important;
+  font-weight: 700 !important;
+  border-radius: 5px !important;
 }
 
 /* Sidebar & Header Navigation */
 .sidebar {
   border-right: var(--neo-card-border-width) solid var(--neo-border-color) !important;
-  box-shadow: 4px 0px 0px var(--neo-shadow-color) !important;
+  box-shadow: 3px 0px 0px var(--neo-shadow-color) !important;
 }
 
 .sidebar-header,
@@ -2708,19 +2708,19 @@ html, body {
 }
 
 .nav-item {
-  border: 2px solid transparent;
+  border: 1.5px solid transparent;
   transition: all 0.15s ease !important;
 }
 
 .nav-item:hover {
-  border: 2px solid var(--neo-border-color) !important;
-  box-shadow: 3px 3px 0px var(--neo-shadow-color) !important;
+  border: 1.5px solid var(--neo-border-color) !important;
+  box-shadow: 2.5px 2.5px 0px var(--neo-shadow-color) !important;
   transform: translate(-1px, -1px) !important;
 }
 
 .nav-item.active {
   border: var(--neo-btn-border-width) solid var(--neo-border-color) !important;
-  box-shadow: 4px 4px 0px var(--neo-shadow-color) !important;
+  box-shadow: 3px 3px 0px var(--neo-shadow-color) !important;
   background: var(--accent-primary) !important;
   color: #ffffff !important;
   font-weight: 800 !important;
@@ -2728,7 +2728,7 @@ html, body {
 
 .top-header {
   border-bottom: var(--neo-card-border-width) solid var(--neo-border-color) !important;
-  box-shadow: 0px 4px 0px var(--neo-shadow-color) !important;
+  box-shadow: 0px 3px 0px var(--neo-shadow-color) !important;
 }
 
 /* Table Cell Borders */
@@ -2745,38 +2745,38 @@ html, body {
 /* Toast Notifications */
 .toast {
   border: var(--neo-card-border-width) solid var(--neo-border-color) !important;
-  box-shadow: 5px 5px 0px var(--neo-shadow-color) !important;
-  border-radius: 8px !important;
+  box-shadow: 4px 4px 0px var(--neo-shadow-color) !important;
+  border-radius: 6px !important;
 }
 
 /* Range Sliders */
 .range-slider {
-  border: 2px solid var(--neo-border-color) !important;
-  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
+  border: 1.5px solid var(--neo-border-color) !important;
+  box-shadow: 1.5px 1.5px 0px var(--neo-shadow-color) !important;
   border-radius: 4px !important;
 }
 
 .range-slider::-webkit-slider-thumb {
-  border: 2px solid var(--neo-border-color) !important;
-  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
-  border-radius: 6px !important;
+  border: 1.5px solid var(--neo-border-color) !important;
+  box-shadow: 1.5px 1.5px 0px var(--neo-shadow-color) !important;
+  border-radius: 5px !important;
 }
 
 .range-val {
   background: var(--accent-yellow) !important;
   color: #000000 !important;
-  border: 2px solid var(--neo-border-color) !important;
-  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
-  padding: 2px 8px !important;
-  border-radius: 6px !important;
+  border: 1.5px solid var(--neo-border-color) !important;
+  box-shadow: 1.5px 1.5px 0px var(--neo-shadow-color) !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
   font-weight: 800 !important;
 }
 
 /* Waveform Canvas */
 .waveform-canvas {
   border: var(--neo-btn-border-width) solid var(--neo-border-color) !important;
-  box-shadow: 4px 4px 0px var(--neo-shadow-color) !important;
-  border-radius: 8px !important;
+  box-shadow: 3px 3px 0px var(--neo-shadow-color) !important;
+  border-radius: 6px !important;
 }
 
 /* Stat Icons & Logo Icon */
@@ -2784,65 +2784,65 @@ html, body {
 .stat-icon,
 .auth-logo {
   border: var(--neo-btn-border-width) solid var(--neo-border-color) !important;
-  box-shadow: 3px 3px 0px var(--neo-shadow-color) !important;
-  border-radius: 10px !important;
+  box-shadow: 2.5px 2.5px 0px var(--neo-shadow-color) !important;
+  border-radius: 8px !important;
 }
 
 /* Verification Banner */
 .verify-banner {
   border: var(--neo-card-border-width) solid var(--neo-border-color) !important;
-  box-shadow: 5px 5px 0px var(--neo-shadow-color) !important;
-  border-radius: 10px !important;
+  box-shadow: 4px 4px 0px var(--neo-shadow-color) !important;
+  border-radius: 8px !important;
 }
 
 /* Keyboard Shortcuts */
 kbd,
 .desktop-shortcut kbd {
-  border: 2px solid var(--neo-border-color) !important;
-  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
+  border: 1.5px solid var(--neo-border-color) !important;
+  box-shadow: 1.5px 1.5px 0px var(--neo-shadow-color) !important;
   background: var(--accent-yellow) !important;
   color: #000000 !important;
   font-weight: 800 !important;
 }
 
-/* --- COMPACT HISTORY ACTION BUTTONS (DESKTOP TABLE & MOBILE CARDS) --- */
+/* --- EXTRA COMPACT HISTORY ACTION BUTTONS (DESKTOP TABLE & MOBILE CARDS) --- */
 .history-actions-group .btn,
 .history-card-actions .btn {
-  padding: 4px 8px !important;
-  font-size: 0.75rem !important;
-  height: 30px !important;
-  min-height: 30px !important;
+  padding: 2px 6px !important;
+  font-size: 0.7rem !important;
+  height: 26px !important;
+  min-height: 26px !important;
   min-width: 0 !important;
-  border: var(--neo-badge-border-width) solid var(--neo-border-color) !important;
-  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
-  border-radius: 5px !important;
-  gap: 4px !important;
+  border: 1px solid var(--neo-border-color) !important;
+  box-shadow: 1.5px 1.5px 0px var(--neo-shadow-color) !important;
+  border-radius: 4px !important;
+  gap: 3px !important;
 }
 
 .history-actions-group .btn i,
 .history-card-actions .btn i {
-  font-size: 0.8rem !important;
+  font-size: 0.75rem !important;
 }
 
 .history-actions-group .btn:hover,
 .history-card-actions .btn:hover {
   transform: translate(-1px, -1px) !important;
-  box-shadow: 3px 3px 0px var(--neo-shadow-color) !important;
+  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
 }
 
 .history-actions-group .btn:active,
 .history-card-actions .btn:active {
-  transform: translate(1px, 1px) !important;
-  box-shadow: 1px 1px 0px var(--neo-shadow-color) !important;
+  transform: translate(0.5px, 0.5px) !important;
+  box-shadow: 0.5px 0.5px 0px var(--neo-shadow-color) !important;
 }
 
-/* Mobile history card action grid - compact & neat */
+/* Mobile history card action grid - extra compact & neat */
 .history-card-actions {
   display: grid !important;
   grid-template-columns: repeat(5, 1fr) !important;
-  gap: 5px !important;
+  gap: 4px !important;
   width: 100% !important;
-  margin-top: 10px !important;
+  margin-top: 8px !important;
 }
 
 @media (max-width: 576px) {
@@ -2852,9 +2852,9 @@ kbd,
 
   .history-card-actions .btn {
     padding: 0 !important;
-    height: 34px !important;
-    min-height: 34px !important;
-    font-size: 0.95rem !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    font-size: 0.85rem !important;
   }
 }
 
