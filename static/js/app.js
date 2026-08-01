@@ -587,21 +587,21 @@ document.addEventListener('DOMContentLoaded', () => {
               <td>${item.character_count} chars</td>
               <td>${new Date(item.created_at).toLocaleDateString()}</td>
               <td>
-                <div style="display:flex; gap:6px; flex-wrap: wrap;">
+                <div class="history-actions-group" style="display:flex; gap:6px; flex-wrap: wrap;">
                   <button class="btn btn-primary btn-sm play-history-btn" data-url="${item.audio_url}" title="Play Audio">
-                    <i class="bi bi-play-fill"></i> Play
+                    <i class="bi bi-play-fill"></i> <span class="btn-text">Play</span>
                   </button>
                   <button class="btn btn-secondary btn-sm download-history-btn" data-url="${item.audio_url}" data-filename="speech_${item.id}.mp3" title="Download MP3">
-                    <i class="bi bi-download"></i>
+                    <i class="bi bi-download"></i> <span class="btn-text">Download</span>
                   </button>
                   <button class="btn btn-secondary btn-sm duplicate-history-btn" data-text="${encodeURIComponent(item.text)}" data-voice="${item.voice}" data-speed="${item.speed}" data-pitch="${item.pitch}" data-volume="${item.volume}" title="Duplicate / Copy Settings">
-                    <i class="bi bi-copy"></i>
+                    <i class="bi bi-copy"></i> <span class="btn-text">Copy</span>
                   </button>
                   <button class="btn btn-secondary btn-sm edit-history-btn" data-text="${encodeURIComponent(item.text)}" data-voice="${item.voice}" data-speed="${item.speed}" data-pitch="${item.pitch}" data-volume="${item.volume}" title="Edit in Studio">
-                    <i class="bi bi-pencil-square"></i>
+                    <i class="bi bi-pencil-square"></i> <span class="btn-text">Edit</span>
                   </button>
                   <button class="btn btn-danger btn-sm delete-history-btn" data-id="${item.id}" title="Delete Record">
-                    <i class="bi bi-trash-fill"></i>
+                    <i class="bi bi-trash-fill"></i> <span class="btn-text">Delete</span>
                   </button>
                 </div>
               </td>
@@ -673,21 +673,21 @@ document.addEventListener('DOMContentLoaded', () => {
                   </div>
                 </div>
                 
-                <div class="history-card-actions" style="display:flex; gap:6px; flex-wrap:wrap;">
-                  <button class="btn btn-primary btn-sm play-history-btn" data-url="${item.audio_url}">
-                    <i class="bi bi-play-fill"></i> Play
+                <div class="history-card-actions">
+                  <button class="btn btn-primary btn-sm play-history-btn" data-url="${item.audio_url}" title="Play Audio">
+                    <i class="bi bi-play-fill"></i> <span class="btn-text">Play</span>
                   </button>
-                  <button class="btn btn-secondary btn-sm download-history-btn" data-url="${item.audio_url}" data-filename="speech_${item.id}.mp3">
-                    <i class="bi bi-download"></i> Download
+                  <button class="btn btn-secondary btn-sm download-history-btn" data-url="${item.audio_url}" data-filename="speech_${item.id}.mp3" title="Download MP3">
+                    <i class="bi bi-download"></i> <span class="btn-text">Download</span>
                   </button>
-                  <button class="btn btn-secondary btn-sm duplicate-history-btn" data-text="${encodeURIComponent(item.text)}" data-voice="${item.voice}" data-speed="${item.speed}" data-pitch="${item.pitch}" data-volume="${item.volume}">
-                    <i class="bi bi-copy"></i> Duplicate
+                  <button class="btn btn-secondary btn-sm duplicate-history-btn" data-text="${encodeURIComponent(item.text)}" data-voice="${item.voice}" data-speed="${item.speed}" data-pitch="${item.pitch}" data-volume="${item.volume}" title="Duplicate / Copy Settings">
+                    <i class="bi bi-copy"></i> <span class="btn-text">Copy</span>
                   </button>
-                  <button class="btn btn-secondary btn-sm edit-history-btn" data-text="${encodeURIComponent(item.text)}" data-voice="${item.voice}" data-speed="${item.speed}" data-pitch="${item.pitch}" data-volume="${item.volume}">
-                    <i class="bi bi-pencil-square"></i> Edit
+                  <button class="btn btn-secondary btn-sm edit-history-btn" data-text="${encodeURIComponent(item.text)}" data-voice="${item.voice}" data-speed="${item.speed}" data-pitch="${item.pitch}" data-volume="${item.volume}" title="Edit in Studio">
+                    <i class="bi bi-pencil-square"></i> <span class="btn-text">Edit</span>
                   </button>
-                  <button class="btn btn-danger btn-sm delete-history-btn" data-id="${item.id}">
-                    <i class="bi bi-trash-fill"></i>
+                  <button class="btn btn-danger btn-sm delete-history-btn" data-id="${item.id}" title="Delete Record">
+                    <i class="bi bi-trash-fill"></i> <span class="btn-text">Delete</span>
                   </button>
                 </div>
               </div>
@@ -1350,20 +1350,23 @@ document.addEventListener('DOMContentLoaded', () => {
         btnPath = btnUrl;
       }
 
-      const hasText = btn.textContent.includes('Play') || btn.textContent.includes('Pause');
+      const icon = btn.querySelector('i');
+      const textSpan = btn.querySelector('.btn-text');
 
       if (btnPath === currentSrc && isPlaying) {
-        if (hasText) {
-          btn.innerHTML = '<i class="bi bi-pause-fill"></i> Pause';
-        } else {
-          btn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+        if (icon) icon.className = 'bi bi-pause-fill';
+        if (textSpan) {
+          textSpan.textContent = 'Pause';
+        } else if (!icon) {
+          btn.innerHTML = '<i class="bi bi-pause-fill"></i> <span class="btn-text">Pause</span>';
         }
         btn.classList.add('playing');
       } else {
-        if (hasText) {
-          btn.innerHTML = '<i class="bi bi-play-fill"></i> Play';
-        } else {
-          btn.innerHTML = '<i class="bi bi-play-fill"></i>';
+        if (icon) icon.className = 'bi bi-play-fill';
+        if (textSpan) {
+          textSpan.textContent = 'Play';
+        } else if (!icon) {
+          btn.innerHTML = '<i class="bi bi-play-fill"></i> <span class="btn-text">Play</span>';
         }
         btn.classList.remove('playing');
       }

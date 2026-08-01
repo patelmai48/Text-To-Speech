@@ -2565,4 +2565,274 @@ html, body {
     border-radius: 16px 16px 0 0;
   }
 }
+
+/* ==========================================================================
+   NEO-BRUTALISM UI DESIGN SYSTEM OVERRIDES & RESPONSIVE HISTORY CARD FIX
+   ========================================================================== */
+
+/* --- Neo-Brutalism Global Tokens & Component Overrides --- */
+:root {
+  --neo-border-color: #000000;
+  --neo-shadow-color: #000000;
+  --neo-border: 3px solid #000000;
+  --neo-border-sm: 2px solid #000000;
+  --neo-shadow: 4px 4px 0px #000000;
+  --neo-shadow-lg: 6px 6px 0px #000000;
+  --neo-shadow-sm: 2px 2px 0px #000000;
+}
+
+/* Bold borders and hard offset drop shadows for cards */
+.glass-card,
+.stat-card,
+.voice-card,
+.auth-card,
+.history-card,
+.player-card,
+.danger-zone-card,
+.welcome-banner,
+.modal-container,
+.legal-card,
+.empty-state-card {
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
+  border-radius: 10px !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
+}
+
+.glass-card:hover,
+.stat-card:hover,
+.voice-card:hover,
+.history-card:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 7px 7px 0px #000000 !important;
+}
+
+/* Neo-Brutalist Tactile Buttons */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-convert,
+.play-circle-btn,
+.btn-google,
+.icon-btn {
+  border: 2.5px solid #000000 !important;
+  box-shadow: 4px 4px 0px #000000 !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 8px !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease !important;
+}
+
+.btn:hover:not(:disabled),
+.btn-primary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled),
+.btn-danger:hover:not(:disabled),
+.btn-convert:hover:not(:disabled),
+.play-circle-btn:hover:not(:disabled),
+.btn-google:hover:not(:disabled),
+.icon-btn:hover:not(:disabled) {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0px #000000 !important;
+}
+
+.btn:active:not(:disabled),
+.btn-primary:active:not(:disabled),
+.btn-secondary:active:not(:disabled),
+.btn-danger:active:not(:disabled),
+.btn-convert:active:not(:disabled),
+.play-circle-btn:active:not(:disabled),
+.btn-google:active:not(:disabled),
+.icon-btn:active:not(:disabled) {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px #000000 !important;
+}
+
+/* Distinct Neo-Brutalist Form Inputs & Textareas */
+.input-custom,
+.select-custom,
+.text-editor {
+  border: 2.5px solid #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.15s ease !important;
+}
+
+.input-custom:focus,
+.select-custom:focus,
+.text-editor:focus {
+  border-color: var(--accent-primary) !important;
+  box-shadow: 4px 4px 0px #000000 !important;
+}
+
+/* Badges with sharp black outlines */
+.badge,
+.status-badge,
+.voice-gender-badge,
+.voice-id-badge,
+.voice-type-badge,
+.usage-badge,
+.voice-gender-text {
+  border: 2px solid #000000 !important;
+  box-shadow: 2px 2px 0px #000000 !important;
+  font-weight: 800 !important;
+  border-radius: 6px !important;
+}
+
+/* Sidebar & Header Navigation Neo-Brutalist styling */
+.sidebar {
+  border-right: 3px solid #000000 !important;
+  box-shadow: 4px 0px 0px #000000 !important;
+}
+
+.sidebar-header,
+.sidebar-footer {
+  border-color: #000000 !important;
+}
+
+.nav-item {
+  border: 2px solid transparent;
+  transition: all 0.15s ease !important;
+}
+
+.nav-item:hover {
+  border: 2px solid #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+  transform: translate(-1px, -1px) !important;
+}
+
+.nav-item.active {
+  border: 2.5px solid #000000 !important;
+  box-shadow: 4px 4px 0px #000000 !important;
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+.top-header {
+  border-bottom: 3px solid #000000 !important;
+  box-shadow: 0px 4px 0px #000000 !important;
+}
+
+/* Custom Table Neo-Brutalist Cell Borders */
+.custom-table th {
+  border-bottom: 3px solid #000000 !important;
+  color: var(--text-primary) !important;
+  font-weight: 800 !important;
+}
+
+.custom-table td {
+  border: 2px solid #000000 !important;
+}
+
+/* Toast Notification Styling */
+.toast {
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
+  border-radius: 8px !important;
+}
+
+/* Range Sliders Neo-Brutalism Styling */
+.range-slider {
+  border: 2px solid #000000 !important;
+  box-shadow: 2px 2px 0px #000000 !important;
+  border-radius: 4px !important;
+}
+
+.range-slider::-webkit-slider-thumb {
+  border: 2px solid #000000 !important;
+  box-shadow: 2px 2px 0px #000000 !important;
+  border-radius: 6px !important;
+}
+
+.range-val {
+  background: var(--accent-yellow) !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 2px 2px 0px #000000 !important;
+  padding: 2px 8px !important;
+  border-radius: 6px !important;
+  font-weight: 800 !important;
+}
+
+/* Waveform Canvas Neo-Brutalism Styling */
+.waveform-canvas {
+  border: 2.5px solid #000000 !important;
+  box-shadow: 4px 4px 0px #000000 !important;
+  border-radius: 8px !important;
+}
+
+/* Stat Icons & Logo Icon */
+.logo-icon,
+.stat-icon,
+.auth-logo {
+  border: 2.5px solid #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+  border-radius: 10px !important;
+}
+
+/* Verification Banner */
+.verify-banner {
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
+  border-radius: 10px !important;
+}
+
+/* Keyboard Shortcuts & Labels */
+kbd,
+.desktop-shortcut kbd {
+  border: 2px solid #000000 !important;
+  box-shadow: 2px 2px 0px #000000 !important;
+  background: var(--accent-yellow) !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+/* --- MOBILE HISTORY CARD & ACTION BUTTONS SPECIFIC FIX --- */
+.history-card-actions {
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 6px !important;
+  width: 100% !important;
+  margin-top: 12px !important;
+}
+
+.history-card-actions .btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  padding: 8px 4px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  font-size: 0.82rem !important;
+  white-space: nowrap !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 2px 2px 0px #000000 !important;
+  border-radius: 6px !important;
+}
+
+.history-card-actions .btn:hover {
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+}
+
+.history-card-actions .btn:active {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0px #000000 !important;
+}
+
+/* On mobile viewports (<= 576px), hide button text labels so icons line up cleanly in 1 row */
+@media (max-width: 576px) {
+  .history-card-actions .btn .btn-text {
+    display: none !important;
+  }
+
+  .history-card-actions .btn {
+    padding: 10px 0 !important;
+    font-size: 1.1rem !important;
+  }
+}
 
