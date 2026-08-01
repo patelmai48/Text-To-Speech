@@ -2573,15 +2573,15 @@ html, body {
 /* --- Neo-Brutalism Global Tokens --- */
 :root,
 [data-theme="light"] {
-  --neo-border-color: #000000;
-  --neo-shadow-color: #000000;
-  --neo-card-border-width: 2.5px;
-  --neo-btn-border-width: 2px;
-  --neo-badge-border-width: 1.5px;
-  --neo-card-shadow: 4px 4px 0px #000000;
-  --neo-card-hover-shadow: 6px 6px 0px #000000;
-  --neo-btn-shadow: 3px 3px 0px #000000;
-  --neo-btn-hover-shadow: 5px 5px 0px #000000;
+  --neo-border-color: #334155;
+  --neo-shadow-color: rgba(30, 41, 59, 0.25);
+  --neo-card-border-width: 2px;
+  --neo-btn-border-width: 1.5px;
+  --neo-badge-border-width: 1px;
+  --neo-card-shadow: 3px 3px 0px var(--neo-shadow-color);
+  --neo-card-hover-shadow: 4px 4px 0px var(--neo-shadow-color);
+  --neo-btn-shadow: 2px 2px 0px var(--neo-shadow-color);
+  --neo-btn-hover-shadow: 3px 3px 0px var(--neo-shadow-color);
 }
 
 [data-theme="dark"] {
