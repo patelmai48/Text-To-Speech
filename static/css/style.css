@@ -2567,23 +2567,23 @@ html, body {
 }
 
 /* ==========================================================================
-   UNIFIED NEO-BRUTALISM UI DESIGN SYSTEM (DARK & LIGHT MODE PARITY)
+   NEO-BRUTALISM UI DESIGN SYSTEM (LIGHT & DARK THEMES) & COMPACT HISTORY BUTTONS
    ========================================================================== */
 
-/* --- Unified Neo-Brutalism Tokens for Dark & Light Themes --- */
+/* --- Neo-Brutalism Global Tokens (Solid Black Borders & Shadows for Both Light and Dark Themes) --- */
 :root,
 [data-theme="dark"],
 [data-theme="light"] {
   --neo-border-color: #000000;
   --neo-shadow-color: #000000;
-  --neo-border: 2.5px solid #000000;
+  --neo-border: 3px solid #000000;
   --neo-border-sm: 2px solid #000000;
   --neo-shadow: 4px 4px 0px #000000;
   --neo-shadow-lg: 5px 5px 0px #000000;
   --neo-shadow-sm: 2px 2px 0px #000000;
 }
 
-/* High-Contrast Neo-Brutalist Cards (Dark & Light Mode) */
+/* Neo-Brutalist Cards */
 .glass-card,
 .stat-card,
 .voice-card,
@@ -2595,8 +2595,8 @@ html, body {
 .modal-container,
 .legal-card,
 .empty-state-card {
-  border: 2.5px solid #000000 !important;
-  box-shadow: 4px 4px 0px #000000 !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
   border-radius: 10px !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
 }
@@ -2606,10 +2606,10 @@ html, body {
 .voice-card:hover,
 .history-card:hover {
   transform: translate(-2px, -2px) !important;
-  box-shadow: 6px 6px 0px #000000 !important;
+  box-shadow: 7px 7px 0px #000000 !important;
 }
 
-/* High-Contrast Tactile Buttons */
+/* Tactile Buttons */
 .btn,
 .btn-primary,
 .btn-secondary,
@@ -2618,12 +2618,12 @@ html, body {
 .play-circle-btn,
 .btn-google,
 .icon-btn {
-  border: 2px solid #000000 !important;
-  box-shadow: 3px 3px 0px #000000 !important;
+  border: 2.5px solid #000000 !important;
+  box-shadow: 4px 4px 0px #000000 !important;
   font-weight: 700 !important;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  border-radius: 6px !important;
+  letter-spacing: 0.5px;
+  border-radius: 8px !important;
   transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease !important;
 }
 
@@ -2635,8 +2635,8 @@ html, body {
 .play-circle-btn:hover:not(:disabled),
 .btn-google:hover:not(:disabled),
 .icon-btn:hover:not(:disabled) {
-  transform: translate(-1px, -1px) !important;
-  box-shadow: 5px 5px 0px #000000 !important;
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0px #000000 !important;
 }
 
 .btn:active:not(:disabled),
@@ -2647,17 +2647,17 @@ html, body {
 .play-circle-btn:active:not(:disabled),
 .btn-google:active:not(:disabled),
 .icon-btn:active:not(:disabled) {
-  transform: translate(1px, 1px) !important;
-  box-shadow: 1.5px 1.5px 0px #000000 !important;
+  transform: translate(2px, 2px) !important;
+  box-shadow: 2px 2px 0px #000000 !important;
 }
 
 /* Form Inputs & Textareas */
 .input-custom,
 .select-custom,
 .text-editor {
-  border: 2px solid #000000 !important;
+  border: 2.5px solid #000000 !important;
   box-shadow: 3px 3px 0px #000000 !important;
-  border-radius: 6px !important;
+  border-radius: 8px !important;
   font-weight: 600 !important;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.15s ease !important;
 }
@@ -2669,7 +2669,7 @@ html, body {
   box-shadow: 4px 4px 0px #000000 !important;
 }
 
-/* Badges with solid black outlines */
+/* Badges */
 .badge,
 .status-badge,
 .voice-gender-badge,
@@ -2683,10 +2683,10 @@ html, body {
   border-radius: 6px !important;
 }
 
-/* Sidebar & Header Navigation Styling */
+/* Sidebar & Header Navigation */
 .sidebar {
-  border-right: 2.5px solid #000000 !important;
-  box-shadow: 3.5px 0px 0px #000000 !important;
+  border-right: 3px solid #000000 !important;
+  box-shadow: 4px 0px 0px #000000 !important;
 }
 
 .sidebar-header,
@@ -2706,21 +2706,21 @@ html, body {
 }
 
 .nav-item.active {
-  border: 2px solid #000000 !important;
-  box-shadow: 3.5px 3.5px 0px #000000 !important;
+  border: 2.5px solid #000000 !important;
+  box-shadow: 4px 4px 0px #000000 !important;
   background: var(--accent-primary) !important;
   color: #ffffff !important;
   font-weight: 800 !important;
 }
 
 .top-header {
-  border-bottom: 2.5px solid #000000 !important;
-  box-shadow: 0px 3.5px 0px #000000 !important;
+  border-bottom: 3px solid #000000 !important;
+  box-shadow: 0px 4px 0px #000000 !important;
 }
 
-/* Custom Table Cell Borders */
+/* Table Cell Borders */
 .custom-table th {
-  border-bottom: 2.5px solid #000000 !important;
+  border-bottom: 3px solid #000000 !important;
   color: var(--text-primary) !important;
   font-weight: 800 !important;
 }
@@ -2731,12 +2731,12 @@ html, body {
 
 /* Toast Notifications */
 .toast {
-  border: 2.5px solid #000000 !important;
-  box-shadow: 4px 4px 0px #000000 !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
   border-radius: 8px !important;
 }
 
-/* Range Sliders Styling */
+/* Range Sliders */
 .range-slider {
   border: 2px solid #000000 !important;
   box-shadow: 2px 2px 0px #000000 !important;
@@ -2754,33 +2754,32 @@ html, body {
   color: #000000 !important;
   border: 2px solid #000000 !important;
   box-shadow: 2px 2px 0px #000000 !important;
-  padding: 1px 6px !important;
-  border-radius: 4px !important;
+  padding: 2px 8px !important;
+  border-radius: 6px !important;
   font-weight: 800 !important;
-  font-size: 0.8rem !important;
 }
 
 /* Waveform Canvas */
 .waveform-canvas {
   border: 2.5px solid #000000 !important;
-  box-shadow: 3.5px 3.5px 0px #000000 !important;
-  border-radius: 6px !important;
+  box-shadow: 4px 4px 0px #000000 !important;
+  border-radius: 8px !important;
 }
 
 /* Stat Icons & Logo Icon */
 .logo-icon,
 .stat-icon,
 .auth-logo {
-  border: 2px solid #000000 !important;
-  box-shadow: 2.5px 2.5px 0px #000000 !important;
-  border-radius: 8px !important;
+  border: 2.5px solid #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+  border-radius: 10px !important;
 }
 
 /* Verification Banner */
 .verify-banner {
-  border: 2.5px solid #000000 !important;
-  box-shadow: 4px 4px 0px #000000 !important;
-  border-radius: 8px !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
+  border-radius: 10px !important;
 }
 
 /* Keyboard Shortcuts */
@@ -2791,17 +2790,15 @@ kbd,
   background: var(--accent-yellow) !important;
   color: #000000 !important;
   font-weight: 800 !important;
-  padding: 2px 5px !important;
-  font-size: 0.75rem !important;
 }
 
-/* --- COMPACT HISTORY BUTTONS (DESKTOP TABLE & MOBILE CARDS) --- */
+/* --- COMPACT HISTORY ACTION BUTTONS (DESKTOP TABLE & MOBILE CARDS) --- */
 .history-actions-group .btn,
 .history-card-actions .btn {
   padding: 4px 8px !important;
-  font-size: 0.78rem !important;
-  height: 32px !important;
-  min-height: 32px !important;
+  font-size: 0.75rem !important;
+  height: 30px !important;
+  min-height: 30px !important;
   min-width: 0 !important;
   border: 2px solid #000000 !important;
   box-shadow: 2px 2px 0px #000000 !important;
@@ -2811,7 +2808,7 @@ kbd,
 
 .history-actions-group .btn i,
 .history-card-actions .btn i {
-  font-size: 0.82rem !important;
+  font-size: 0.8rem !important;
 }
 
 .history-actions-group .btn:hover,
