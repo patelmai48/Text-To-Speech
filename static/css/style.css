@@ -2567,20 +2567,33 @@ html, body {
 }
 
 /* ==========================================================================
-   NEO-BRUTALISM UI DESIGN SYSTEM (LIGHT & DARK THEMES) & COMPACT HISTORY BUTTONS
+   NEO-BRUTALISM UI DESIGN SYSTEM (THEME SPLIT: LIGHT = BLACK BORDERS, DARK = LIGHTER BORDERS)
    ========================================================================== */
 
-/* --- Neo-Brutalism Global Tokens (Solid Black Borders & Shadows for Both Light and Dark Themes) --- */
+/* --- Neo-Brutalism Global Tokens --- */
 :root,
-[data-theme="dark"],
 [data-theme="light"] {
   --neo-border-color: #000000;
   --neo-shadow-color: #000000;
-  --neo-border: 3px solid #000000;
-  --neo-border-sm: 2px solid #000000;
-  --neo-shadow: 4px 4px 0px #000000;
-  --neo-shadow-lg: 5px 5px 0px #000000;
-  --neo-shadow-sm: 2px 2px 0px #000000;
+  --neo-card-border-width: 3px;
+  --neo-btn-border-width: 2.5px;
+  --neo-badge-border-width: 2px;
+  --neo-card-shadow: 5px 5px 0px #000000;
+  --neo-card-hover-shadow: 7px 7px 0px #000000;
+  --neo-btn-shadow: 4px 4px 0px #000000;
+  --neo-btn-hover-shadow: 6px 6px 0px #000000;
+}
+
+[data-theme="dark"] {
+  --neo-border-color: rgba(255, 255, 255, 0.22);
+  --neo-shadow-color: rgba(0, 0, 0, 0.8);
+  --neo-card-border-width: 2px;
+  --neo-btn-border-width: 1.5px;
+  --neo-badge-border-width: 1.5px;
+  --neo-card-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8);
+  --neo-card-hover-shadow: 5px 5px 0px rgba(0, 0, 0, 0.8);
+  --neo-btn-shadow: 3px 3px 0px rgba(0, 0, 0, 0.8);
+  --neo-btn-hover-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8);
 }
 
 /* Neo-Brutalist Cards */
@@ -2595,8 +2608,8 @@ html, body {
 .modal-container,
 .legal-card,
 .empty-state-card {
-  border: 3px solid #000000 !important;
-  box-shadow: 5px 5px 0px #000000 !important;
+  border: var(--neo-card-border-width) solid var(--neo-border-color) !important;
+  box-shadow: var(--neo-card-shadow) !important;
   border-radius: 10px !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
 }
@@ -2606,7 +2619,7 @@ html, body {
 .voice-card:hover,
 .history-card:hover {
   transform: translate(-2px, -2px) !important;
-  box-shadow: 7px 7px 0px #000000 !important;
+  box-shadow: var(--neo-card-hover-shadow) !important;
 }
 
 /* Tactile Buttons */
@@ -2618,8 +2631,8 @@ html, body {
 .play-circle-btn,
 .btn-google,
 .icon-btn {
-  border: 2.5px solid #000000 !important;
-  box-shadow: 4px 4px 0px #000000 !important;
+  border: var(--neo-btn-border-width) solid var(--neo-border-color) !important;
+  box-shadow: var(--neo-btn-shadow) !important;
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -2636,7 +2649,7 @@ html, body {
 .btn-google:hover:not(:disabled),
 .icon-btn:hover:not(:disabled) {
   transform: translate(-2px, -2px) !important;
-  box-shadow: 6px 6px 0px #000000 !important;
+  box-shadow: var(--neo-btn-hover-shadow) !important;
 }
 
 .btn:active:not(:disabled),
@@ -2647,16 +2660,16 @@ html, body {
 .play-circle-btn:active:not(:disabled),
 .btn-google:active:not(:disabled),
 .icon-btn:active:not(:disabled) {
-  transform: translate(2px, 2px) !important;
-  box-shadow: 2px 2px 0px #000000 !important;
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0px var(--neo-shadow-color) !important;
 }
 
 /* Form Inputs & Textareas */
 .input-custom,
 .select-custom,
 .text-editor {
-  border: 2.5px solid #000000 !important;
-  box-shadow: 3px 3px 0px #000000 !important;
+  border: var(--neo-btn-border-width) solid var(--neo-border-color) !important;
+  box-shadow: 3px 3px 0px var(--neo-shadow-color) !important;
   border-radius: 8px !important;
   font-weight: 600 !important;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.15s ease !important;
@@ -2666,7 +2679,7 @@ html, body {
 .select-custom:focus,
 .text-editor:focus {
   border-color: var(--accent-primary) !important;
-  box-shadow: 4px 4px 0px #000000 !important;
+  box-shadow: 4px 4px 0px var(--neo-shadow-color) !important;
 }
 
 /* Badges */
@@ -2677,21 +2690,21 @@ html, body {
 .voice-type-badge,
 .usage-badge,
 .voice-gender-text {
-  border: 2px solid #000000 !important;
-  box-shadow: 2px 2px 0px #000000 !important;
+  border: var(--neo-badge-border-width) solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
   font-weight: 800 !important;
   border-radius: 6px !important;
 }
 
 /* Sidebar & Header Navigation */
 .sidebar {
-  border-right: 3px solid #000000 !important;
-  box-shadow: 4px 0px 0px #000000 !important;
+  border-right: var(--neo-card-border-width) solid var(--neo-border-color) !important;
+  box-shadow: 4px 0px 0px var(--neo-shadow-color) !important;
 }
 
 .sidebar-header,
 .sidebar-footer {
-  border-color: #000000 !important;
+  border-color: var(--neo-border-color) !important;
 }
 
 .nav-item {
@@ -2700,60 +2713,60 @@ html, body {
 }
 
 .nav-item:hover {
-  border: 2px solid #000000 !important;
-  box-shadow: 3px 3px 0px #000000 !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 3px 3px 0px var(--neo-shadow-color) !important;
   transform: translate(-1px, -1px) !important;
 }
 
 .nav-item.active {
-  border: 2.5px solid #000000 !important;
-  box-shadow: 4px 4px 0px #000000 !important;
+  border: var(--neo-btn-border-width) solid var(--neo-border-color) !important;
+  box-shadow: 4px 4px 0px var(--neo-shadow-color) !important;
   background: var(--accent-primary) !important;
   color: #ffffff !important;
   font-weight: 800 !important;
 }
 
 .top-header {
-  border-bottom: 3px solid #000000 !important;
-  box-shadow: 0px 4px 0px #000000 !important;
+  border-bottom: var(--neo-card-border-width) solid var(--neo-border-color) !important;
+  box-shadow: 0px 4px 0px var(--neo-shadow-color) !important;
 }
 
 /* Table Cell Borders */
 .custom-table th {
-  border-bottom: 3px solid #000000 !important;
+  border-bottom: var(--neo-card-border-width) solid var(--neo-border-color) !important;
   color: var(--text-primary) !important;
   font-weight: 800 !important;
 }
 
 .custom-table td {
-  border: 2px solid #000000 !important;
+  border: var(--neo-badge-border-width) solid var(--neo-border-color) !important;
 }
 
 /* Toast Notifications */
 .toast {
-  border: 3px solid #000000 !important;
-  box-shadow: 5px 5px 0px #000000 !important;
+  border: var(--neo-card-border-width) solid var(--neo-border-color) !important;
+  box-shadow: 5px 5px 0px var(--neo-shadow-color) !important;
   border-radius: 8px !important;
 }
 
 /* Range Sliders */
 .range-slider {
-  border: 2px solid #000000 !important;
-  box-shadow: 2px 2px 0px #000000 !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
   border-radius: 4px !important;
 }
 
 .range-slider::-webkit-slider-thumb {
-  border: 2px solid #000000 !important;
-  box-shadow: 2px 2px 0px #000000 !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
   border-radius: 6px !important;
 }
 
 .range-val {
   background: var(--accent-yellow) !important;
   color: #000000 !important;
-  border: 2px solid #000000 !important;
-  box-shadow: 2px 2px 0px #000000 !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
   padding: 2px 8px !important;
   border-radius: 6px !important;
   font-weight: 800 !important;
@@ -2761,8 +2774,8 @@ html, body {
 
 /* Waveform Canvas */
 .waveform-canvas {
-  border: 2.5px solid #000000 !important;
-  box-shadow: 4px 4px 0px #000000 !important;
+  border: var(--neo-btn-border-width) solid var(--neo-border-color) !important;
+  box-shadow: 4px 4px 0px var(--neo-shadow-color) !important;
   border-radius: 8px !important;
 }
 
@@ -2770,23 +2783,23 @@ html, body {
 .logo-icon,
 .stat-icon,
 .auth-logo {
-  border: 2.5px solid #000000 !important;
-  box-shadow: 3px 3px 0px #000000 !important;
+  border: var(--neo-btn-border-width) solid var(--neo-border-color) !important;
+  box-shadow: 3px 3px 0px var(--neo-shadow-color) !important;
   border-radius: 10px !important;
 }
 
 /* Verification Banner */
 .verify-banner {
-  border: 3px solid #000000 !important;
-  box-shadow: 5px 5px 0px #000000 !important;
+  border: var(--neo-card-border-width) solid var(--neo-border-color) !important;
+  box-shadow: 5px 5px 0px var(--neo-shadow-color) !important;
   border-radius: 10px !important;
 }
 
 /* Keyboard Shortcuts */
 kbd,
 .desktop-shortcut kbd {
-  border: 2px solid #000000 !important;
-  box-shadow: 2px 2px 0px #000000 !important;
+  border: 2px solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
   background: var(--accent-yellow) !important;
   color: #000000 !important;
   font-weight: 800 !important;
@@ -2800,8 +2813,8 @@ kbd,
   height: 30px !important;
   min-height: 30px !important;
   min-width: 0 !important;
-  border: 2px solid #000000 !important;
-  box-shadow: 2px 2px 0px #000000 !important;
+  border: var(--neo-badge-border-width) solid var(--neo-border-color) !important;
+  box-shadow: 2px 2px 0px var(--neo-shadow-color) !important;
   border-radius: 5px !important;
   gap: 4px !important;
 }
@@ -2814,13 +2827,13 @@ kbd,
 .history-actions-group .btn:hover,
 .history-card-actions .btn:hover {
   transform: translate(-1px, -1px) !important;
-  box-shadow: 3px 3px 0px #000000 !important;
+  box-shadow: 3px 3px 0px var(--neo-shadow-color) !important;
 }
 
 .history-actions-group .btn:active,
 .history-card-actions .btn:active {
   transform: translate(1px, 1px) !important;
-  box-shadow: 1px 1px 0px #000000 !important;
+  box-shadow: 1px 1px 0px var(--neo-shadow-color) !important;
 }
 
 /* Mobile history card action grid - compact & neat */
