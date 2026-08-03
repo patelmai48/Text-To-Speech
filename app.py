@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, jsonify, send_from_directory
+from flask import Flask, render_template, jsonify, send_from_directory, request
 from flask_cors import CORS
 # pyrefly: ignore [missing-import]
 # pyrefly: ignore [missing-import]
@@ -127,12 +127,26 @@ def create_app(config_name=None):
 
     @app.route('/login', methods=['GET', 'POST'])
     def login_page():
-        google_credential = request.form.get('credential') or request.args.get('credential')
+        google_credential = None
+        try:
+            if request.method == 'POST':
+                google_credential = request.form.get('credential')
+            if not google_credential:
+                google_credential = request.args.get('credential')
+        except Exception as e:
+            app.logger.warning(f"Error reading login credential: {e}")
         return render_template('login.html', google_credential=google_credential)
 
     @app.route('/register', methods=['GET', 'POST'])
     def register_page():
-        google_credential = request.form.get('credential') or request.args.get('credential')
+        google_credential = None
+        try:
+            if request.method == 'POST':
+                google_credential = request.form.get('credential')
+            if not google_credential:
+                google_credential = request.args.get('credential')
+        except Exception as e:
+            app.logger.warning(f"Error reading register credential: {e}")
         return render_template('register.html', google_credential=google_credential)
 
     @app.route('/privacy')
