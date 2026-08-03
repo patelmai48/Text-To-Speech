@@ -25,9 +25,21 @@
   <div class="bg-orb bg-orb-2"></div>
 
   <!-- Google Auth Configuration -->
-  <div id="g_id_onload" data-client_id="{% if config.GOOGLE_CLIENT_ID and not config.GOOGLE_CLIENT_ID.startswith('your-google-client-id') %}{{ config.GOOGLE_CLIENT_ID }}{% endif %}" data-context="signin" data-ux_mode="popup"
-    data-callback="handleGoogleSignIn" data-auto_prompt="false" data-itp_support="true">
+  <div id="g_id_onload"
+    data-client_id="{% if config.GOOGLE_CLIENT_ID and not config.GOOGLE_CLIENT_ID.startswith('your-google-client-id') %}{{ config.GOOGLE_CLIENT_ID }}{% endif %}"
+    data-context="signin"
+    data-ux_mode="redirect"
+    data-login_uri="{{ request.base_url }}"
+    data-auto_prompt="false"
+    data-auto_select="false"
+    data-itp_support="true">
   </div>
+
+  {% if google_credential %}
+  <script>
+    window.INITIAL_GOOGLE_CREDENTIAL = "{{ google_credential }}";
+  </script>
+  {% endif %}
 
   <div class="auth-page-container">
     <div class="auth-card">

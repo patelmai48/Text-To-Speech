@@ -125,13 +125,15 @@ def create_app(config_name=None):
     def index():
         return render_template('index.html')
 
-    @app.route('/login')
+    @app.route('/login', methods=['GET', 'POST'])
     def login_page():
-        return render_template('login.html')
+        google_credential = request.form.get('credential') or request.args.get('credential')
+        return render_template('login.html', google_credential=google_credential)
 
-    @app.route('/register')
+    @app.route('/register', methods=['GET', 'POST'])
     def register_page():
-        return render_template('register.html')
+        google_credential = request.form.get('credential') or request.args.get('credential')
+        return render_template('register.html', google_credential=google_credential)
 
     @app.route('/privacy')
     def privacy_page():

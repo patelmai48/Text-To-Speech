@@ -51,6 +51,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const recoveryPasswordBtn = document.getElementById('recovery-password-btn');
   const recoveryForgotBtn = document.getElementById('recovery-forgot-btn');
 
+  // --- Process incoming Google OAuth Redirect Credential ---
+  const urlParams = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.replace('#', '?'));
+  const redirectCredential = window.INITIAL_GOOGLE_CREDENTIAL || urlParams.get('credential') || hashParams.get('credential');
+
+  if (redirectCredential) {
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    window.handleGoogleSignIn({ credential: redirectCredential });
+  }
+
   // --- Initialize Google Accounts SDK programmatically for mobile & desktop ---
   const gIdOnload = document.getElementById('g_id_onload');
   if (gIdOnload) {
@@ -59,7 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         window.google.accounts.id.initialize({
           client_id: clientId,
-          callback: window.handleGoogleSignIn,
+          ux_mode: 'redirect',
+          login_uri: window.location.origin + window.location.pathname,
           auto_select: false,
           itp_support: true
         });
