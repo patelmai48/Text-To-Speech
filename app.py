@@ -16,6 +16,7 @@ from models import db
 from routes.auth import auth_bp
 from routes.tts import tts_bp
 from routes.profile import profile_bp
+from services.keep_alive import start_keep_alive
 
 def create_app(config_name=None):
     """Application factory for Flask app."""
@@ -182,6 +183,9 @@ def create_app(config_name=None):
             db.create_all()
         except Exception as e:
             app.logger.info(f"Database table initialization note: {e}")
+
+    # Start automated 5-minute keep-alive ping thread
+    start_keep_alive(app)
 
     return app
 
