@@ -294,18 +294,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Wire up Google Sign-In Button click fallback
+  // Wire up Google Sign-In Button click handler
   const googleBtn = document.getElementById('google-signin-btn');
   if (googleBtn) {
     googleBtn.addEventListener('click', () => {
-      if (window.google && window.google.accounts && window.google.accounts.id) {
-        window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            showToast('Google Sign-In prompt skipped or not displayed. Please check popup permissions.', 'warning');
-          }
-        });
+      const gIdOnload = document.getElementById('g_id_onload');
+      const clientId = gIdOnload ? gIdOnload.getAttribute('data-client_id') : null;
+
+      if (clientId && !clientId.startsWith('your-google-client-id')) {
+        showToast('Opening Google Sign-In...', 'info', 2500);
+        const redirectUri = window.location.origin + window.location.pathname;
+        const nonce = Math.random().toString(36).substring(2);
+        const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=id_token&scope=openid%20email%20profile&nonce=${nonce}&prompt=select_account`;
+        
+        window.location.href = oauthUrl;
+      } else if (window.google && window.google.accounts && window.google.accounts.id) {
+        window.google.accounts.id.prompt();
       } else {
-        showToast('Google Sign-In is initializing. Please try again in a moment.', 'info');
+        showToast('Google Sign-In is not configured on server.', 'error');
       }
     });
   }

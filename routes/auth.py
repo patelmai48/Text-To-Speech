@@ -348,7 +348,7 @@ def reset_password():
 def google_auth():
     """Authenticate user with Google credentials."""
     data = request.get_json() or {}
-    credential = data.get('credential')
+    credential = data.get('credential') or data.get('id_token')
     if not credential:
         return jsonify({'success': False, 'message': 'Google credential is required.'}), 400
 
