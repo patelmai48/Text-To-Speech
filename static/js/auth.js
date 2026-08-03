@@ -2,6 +2,41 @@
  * Authentication Page Logic (Login, Registration, Google Auth, Forgot/Reset Password)
  */
 
+// Global Google Sign-In Callback Handler
+// Must be defined at global scope before Google Identity Services (GSI) parses data-callback
+window.handleGoogleSignIn = async function(response) {
+  if (!response || !response.credential) {
+    showToast('No Google credential received. Please try again.', 'error');
+    return;
+  }
+
+  try {
+    showToast('Verifying Google Identity...', 'info', 4000);
+    const result = await API.post('/auth/google', { credential: response.credential });
+
+    if (result && result.success && result.token) {
+      AuthToken.set(result.token);
+      showToast(result.message || 'Google Login successful!', 'success', 3000);
+      setTimeout(() => {
+        window.location.replace('/');
+      }, 500);
+    } else {
+      const errMsg = (result && result.message) ? result.message : 'Google Sign-In failed. Please try again.';
+      showToast(errMsg, 'error', 6000);
+
+      const notice = document.getElementById('auth-recovery-notice');
+      const msgElem = document.getElementById('auth-recovery-msg');
+      if (notice && errMsg.toLowerCase().includes('password')) {
+        if (msgElem) msgElem.textContent = errMsg;
+        notice.style.display = 'block';
+      }
+    }
+  } catch (err) {
+    console.error('Google Sign-In Exception:', err);
+    showToast('Google Sign-In error: ' + (err.message || 'Server communication failed'), 'error', 6000);
+  }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('login-form');
   const registerForm = document.getElementById('register-form');
@@ -13,9 +48,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const backToLoginBtn2 = document.getElementById('back-to-login-btn-2');
 
   const recoveryNotice = document.getElementById('auth-recovery-notice');
-  const recoveryMsg = document.getElementById('auth-recovery-msg');
   const recoveryPasswordBtn = document.getElementById('recovery-password-btn');
   const recoveryForgotBtn = document.getElementById('recovery-forgot-btn');
+
+  // --- Initialize Google Accounts SDK programmatically for mobile & desktop ---
+  const gIdOnload = document.getElementById('g_id_onload');
+  if (gIdOnload) {
+    const clientId = gIdOnload.getAttribute('data-client_id');
+    if (clientId && window.google && window.google.accounts && window.google.accounts.id) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: window.handleGoogleSignIn,
+          auto_select: false,
+          itp_support: true
+        });
+      } catch (e) {
+        console.warn('Google GSI initialization notice:', e);
+      }
+    }
+  }
 
   // --- Password Visibility Toggle Handler ---
   document.querySelectorAll('.password-toggle-btn').forEach(btn => {
@@ -174,8 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
         AuthToken.set(result.token);
         showToast(result.message || 'Login successful!', 'success');
         setTimeout(() => {
-          window.location.href = '/';
-        }, 800);
+          window.location.replace('/');
+        }, 500);
       } else {
         showToast(result.message || 'Login failed. Please check your credentials.', 'error');
       }
@@ -221,45 +273,27 @@ document.addEventListener('DOMContentLoaded', () => {
         AuthToken.set(result.token);
         showToast('Account created successfully! Welcome to VoxAI Studio.', 'success');
         setTimeout(() => {
-          window.location.href = '/';
-        }, 1200);
+          window.location.replace('/');
+        }, 800);
       } else {
         showToast(result.message || 'Registration failed.', 'error');
       }
     });
   }
 
-  // --- Google Sign-In Callbacks & Fallback handlers ---
-  window.handleGoogleSignIn = async (response) => {
-    if (!response || !response.credential) return;
-
-    showToast('Verifying Google Identity...', 'info');
-    const result = await API.post('/auth/google', { credential: response.credential });
-    if (result.success && result.token) {
-      AuthToken.set(result.token);
-      showToast(result.message || 'Google Login successful!', 'success');
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 800);
-    } else {
-      showToast(result.message || 'Google Sign-In failed.', 'error');
-    }
-  };
-
-  // Wire up Google Sign-In Button click
+  // Wire up Google Sign-In Button click fallback
   const googleBtn = document.getElementById('google-signin-btn');
   if (googleBtn) {
     googleBtn.addEventListener('click', () => {
       if (window.google && window.google.accounts && window.google.accounts.id) {
         window.google.accounts.id.prompt((notification) => {
           if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            showToast('Please enable popup or configure GOOGLE_CLIENT_ID for Google Sign-In.', 'warning');
+            showToast('Google Sign-In prompt skipped or not displayed. Please check popup permissions.', 'warning');
           }
         });
       } else {
-        showToast('Google Sign-In requires configuring GOOGLE_CLIENT_ID in environment settings.', 'error');
+        showToast('Google Sign-In is initializing. Please try again in a moment.', 'info');
       }
     });
   }
 });
-

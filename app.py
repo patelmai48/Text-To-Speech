@@ -43,6 +43,7 @@ def create_app(config_name=None):
         'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "data:"],
         'img-src': ["'self'", "data:", "https://*"],
         'connect-src': ["'self'", "https://*"],
+        'frame-src': ["'self'", "https://accounts.google.com"],
         'media-src': ["'self'", "blob:", "data:"]
     }
     Talisman(
