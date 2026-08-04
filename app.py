@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, jsonify, send_from_directory, request
+from flask import Flask, render_template, jsonify, send_from_directory
 from flask_cors import CORS
 # pyrefly: ignore [missing-import]
 # pyrefly: ignore [missing-import]
@@ -53,14 +53,12 @@ def create_app(config_name=None):
         session_cookie_secure=not is_testing and not app.debug
     )
 
-    # Configurable CORS origins (restricts wildcard * in production)
+    # Configurable CORS origins (restricts wildcard * in production if specified, default * for API access)
     raw_origins = os.getenv('ALLOWED_ORIGINS')
     if raw_origins:
         allowed_origins = [origin.strip() for origin in raw_origins.split(',')]
-    elif is_testing or app.debug:
-        allowed_origins = '*'
     else:
-        allowed_origins = ['http://localhost:5000', 'http://127.0.0.1:5000']
+        allowed_origins = '*'
 
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
 
@@ -125,29 +123,13 @@ def create_app(config_name=None):
     def index():
         return render_template('index.html')
 
-    @app.route('/login', methods=['GET', 'POST'])
+    @app.route('/login')
     def login_page():
-        google_credential = None
-        try:
-            if request.method == 'POST':
-                google_credential = request.form.get('credential')
-            if not google_credential:
-                google_credential = request.args.get('credential')
-        except Exception as e:
-            app.logger.warning(f"Error reading login credential: {e}")
-        return render_template('login.html', google_credential=google_credential)
+        return render_template('login.html')
 
-    @app.route('/register', methods=['GET', 'POST'])
+    @app.route('/register')
     def register_page():
-        google_credential = None
-        try:
-            if request.method == 'POST':
-                google_credential = request.form.get('credential')
-            if not google_credential:
-                google_credential = request.args.get('credential')
-        except Exception as e:
-            app.logger.warning(f"Error reading register credential: {e}")
-        return render_template('register.html', google_credential=google_credential)
+        return render_template('register.html')
 
     @app.route('/privacy')
     def privacy_page():

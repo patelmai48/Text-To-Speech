@@ -51,35 +51,51 @@ document.addEventListener('DOMContentLoaded', () => {
   const recoveryPasswordBtn = document.getElementById('recovery-password-btn');
   const recoveryForgotBtn = document.getElementById('recovery-forgot-btn');
 
-  // --- Process incoming Google OAuth Redirect Credential ---
-  const urlParams = new URLSearchParams(window.location.search);
-  const hashParams = new URLSearchParams(window.location.hash.replace('#', '?'));
-  const redirectCredential = window.INITIAL_GOOGLE_CREDENTIAL || urlParams.get('credential') || hashParams.get('credential');
-
-  if (redirectCredential) {
-    if (window.history && window.history.replaceState) {
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-    window.handleGoogleSignIn({ credential: redirectCredential });
-  }
-
   // --- Initialize Google Accounts SDK programmatically for mobile & desktop ---
-  const gIdOnload = document.getElementById('g_id_onload');
-  if (gIdOnload) {
+  function initGoogleAuth() {
+    const gIdOnload = document.getElementById('g_id_onload');
+    if (!gIdOnload) return;
     const clientId = gIdOnload.getAttribute('data-client_id');
     if (clientId && window.google && window.google.accounts && window.google.accounts.id) {
       try {
         window.google.accounts.id.initialize({
           client_id: clientId,
-          ux_mode: 'redirect',
-          login_uri: window.location.origin + window.location.pathname,
+          callback: window.handleGoogleSignIn,
           auto_select: false,
           itp_support: true
         });
+
+        const gsiElement = document.querySelector('.g_id_signin');
+        const customGoogleBtn = document.getElementById('google-signin-btn');
+        if (gsiElement && customGoogleBtn) {
+          try {
+            window.google.accounts.id.renderButton(gsiElement, {
+              type: 'standard',
+              theme: 'filled_dark',
+              size: 'large',
+              width: '100%',
+              text: 'signin_with'
+            });
+            customGoogleBtn.style.display = 'none';
+          } catch (e) {
+            console.log('GSI renderButton fallback notice:', e);
+          }
+        }
       } catch (e) {
         console.warn('Google GSI initialization notice:', e);
       }
     }
+  }
+
+  initGoogleAuth();
+  if (!window.google || !window.google.accounts) {
+    const interval = setInterval(() => {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        clearInterval(interval);
+        initGoogleAuth();
+      }
+    }, 300);
+    setTimeout(() => clearInterval(interval), 5000);
   }
 
   // --- Password Visibility Toggle Handler ---
@@ -294,24 +310,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Wire up Google Sign-In Button click handler
+  // Wire up Google Sign-In Button click fallback
   const googleBtn = document.getElementById('google-signin-btn');
   if (googleBtn) {
     googleBtn.addEventListener('click', () => {
       const gIdOnload = document.getElementById('g_id_onload');
       const clientId = gIdOnload ? gIdOnload.getAttribute('data-client_id') : null;
 
-      if (clientId && !clientId.startsWith('your-google-client-id')) {
-        showToast('Opening Google Sign-In...', 'info', 2500);
-        const redirectUri = window.location.origin + window.location.pathname;
-        const nonce = Math.random().toString(36).substring(2);
-        const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=id_token&scope=openid%20email%20profile&nonce=${nonce}&prompt=select_account`;
-        
-        window.location.href = oauthUrl;
-      } else if (window.google && window.google.accounts && window.google.accounts.id) {
-        window.google.accounts.id.prompt();
+      if (!clientId) {
+        showToast('Google Sign-In requires a valid Google Client ID configured on the server.', 'warning', 5000);
+        return;
+      }
+
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: window.handleGoogleSignIn,
+            auto_select: false,
+            itp_support: true
+          });
+          window.google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              const reason = (notification.getNotDisplayedReason && notification.getNotDisplayedReason()) || 'prompt constraint';
+              console.warn('Google prompt notice:', reason);
+              showToast('Google Sign-In prompt was skipped or blocked (' + reason + '). Please check browser popups.', 'warning', 6000);
+            }
+          });
+        } catch (err) {
+          console.error('Google Sign-In initialization exception:', err);
+          showToast('Failed to initialize Google Sign-In: ' + err.message, 'error', 5000);
+        }
       } else {
-        showToast('Google Sign-In is not configured on server.', 'error');
+        showToast('Google Sign-In service is initializing. Please try again in a moment.', 'info', 4000);
       }
     });
   }
