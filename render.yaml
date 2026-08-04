@@ -16,5 +16,5 @@ services:
       - key: GOOGLE_CLIENT_ID
         value: "593348183512-bi8t063tk73uesvqd6j643btukr8uia4.apps.googleusercontent.com"
       - key: PING_URL
-        value: "https://ech-efmm.onrender.com/health"
+        value: "https://text-to-speech-efmm.onrender.com/health"
 
