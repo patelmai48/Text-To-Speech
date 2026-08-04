@@ -3,6 +3,7 @@ import uuid
 import re
 import requests
 from collections import Counter
+# pyrefly: ignore [missing-import]
 from gtts import gTTS
 
 SUPPORTED_LANGUAGES = [
@@ -173,6 +174,7 @@ def generate_speech(text, voice_id="en-us", speed=1.0, output_folder="static/aud
 
     try:
         if tld == "eleven":
+            # pyrefly: ignore [missing-import]
             from dotenv import load_dotenv
             load_dotenv()
             api_key = os.getenv("ELEVEN_LABS_API_KEY")
@@ -204,6 +206,7 @@ def generate_speech(text, voice_id="en-us", speed=1.0, output_folder="static/aud
                 f.write(response.content)
         elif tld == "edge":
             import asyncio
+            # pyrefly: ignore [missing-import]
             import edge_tts
             import threading
             

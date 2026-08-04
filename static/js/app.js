@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEditorAutoSave();
     setupAudioPlayer();
     setupQuickConvert();
-    setupDeleteAccountModal();
+    setupProfileHandlers();
     setupVerificationHandlers();
 
     await loadUserData();
@@ -1371,6 +1371,122 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.classList.remove('playing');
       }
     });
+  }
+
+  // --- Profile & Account Settings Handlers ---
+  function setupProfileHandlers() {
+    // 1. Save Profile Form (Username & Email Update)
+    if (profileForm) {
+      profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const usernameInput = document.getElementById('profile-username');
+        const emailInput = document.getElementById('profile-email');
+        const submitBtn = profileForm.querySelector('button[type="submit"]');
+
+        const username = usernameInput ? usernameInput.value.trim() : '';
+        const email = emailInput ? emailInput.value.trim() : '';
+
+        if (!username || !email) {
+          showToast('Please enter both username and email.', 'warning');
+          return;
+        }
+
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="spinner"></div> Saving...';
+
+        const res = await API.put('/profile', { username, email });
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+
+        if (res.success) {
+          showToast(res.message || 'Profile saved successfully!', 'success');
+          if (res.user) {
+            currentUser = res.user;
+            // Refresh Header & Sidebar UI
+            document.querySelectorAll('.user-name-display').forEach(el => el.textContent = currentUser.username);
+            document.querySelectorAll('.user-email-display').forEach(el => el.textContent = currentUser.email);
+            document.querySelectorAll('.avatar-circle').forEach(el => el.textContent = currentUser.username.charAt(0).toUpperCase());
+          }
+        } else {
+          showToast(res.message || 'Failed to update profile.', 'error');
+        }
+      });
+    }
+
+    // 2. Change Password Form
+    if (passwordForm) {
+      passwordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const currentPassInput = document.getElementById('current-password');
+        const newPassInput = document.getElementById('new-password');
+        const submitBtn = passwordForm.querySelector('button[type="submit"]');
+
+        const current_password = currentPassInput ? currentPassInput.value : '';
+        const new_password = newPassInput ? newPassInput.value : '';
+
+        if (!current_password || !new_password) {
+          showToast('Please enter both current and new password.', 'warning');
+          return;
+        }
+
+        if (new_password.length < 6) {
+          showToast('New password must be at least 6 characters.', 'warning');
+          return;
+        }
+
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="spinner"></div> Updating...';
+
+        const res = await API.put('/profile/password', { current_password, new_password });
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+
+        if (res.success) {
+          showToast('Password updated successfully!', 'success');
+          passwordForm.reset();
+        } else {
+          showToast(res.message || 'Failed to update password.', 'error');
+        }
+      });
+    }
+
+    // 3. Delete Account Button
+    if (deleteAccountBtn) {
+      deleteAccountBtn.addEventListener('click', async () => {
+        const password = prompt('SECURITY CONFIRMATION:\nPlease enter your password to permanently delete your VoxAI Studio account and all history data:');
+        if (password === null) return;
+        if (!password) {
+          showToast('Password is required to confirm account deletion.', 'warning');
+          return;
+        }
+
+        if (!confirm('Are you absolutely sure you want to delete your account? This action CANNOT be undone.')) {
+          return;
+        }
+
+        deleteAccountBtn.disabled = true;
+        deleteAccountBtn.innerHTML = 'Deleting Account...';
+
+        const res = await API.delete('/profile', { current_password: password });
+
+        deleteAccountBtn.disabled = false;
+        deleteAccountBtn.innerHTML = 'Delete Account';
+
+        if (res.success) {
+          showToast('Account deleted successfully.', 'info');
+          AuthToken.remove();
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 1000);
+        } else {
+          showToast(res.message || 'Failed to delete account.', 'error');
+        }
+      });
+    }
   }
 
   // --- Verification Banner & Modal Handlers ---
