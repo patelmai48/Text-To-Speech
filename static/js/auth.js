@@ -73,8 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
               type: 'standard',
               theme: 'filled_dark',
               size: 'large',
-              width: '100%',
-              text: 'signin_with'
+              width: '400',
+              text: 'signin_with',
+              logo_alignment: 'left'
             });
             customGoogleBtn.style.display = 'none';
           } catch (e) {
